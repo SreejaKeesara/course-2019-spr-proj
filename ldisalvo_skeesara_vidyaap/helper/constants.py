@@ -30,6 +30,17 @@ STATE_SENATE_ELECTIONS_RESULTS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(
 SENATE_DISTRICT_IDEOLOGIES = "senateDistrictIdeologies"
 SENATE_DISTRICT_IDEOLOGIES_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=SENATE_DISTRICT_IDEOLOGIES)
 
+VOTING_DISTRICT_TOWNS = "votingDistrictTowns"
+VOTING_DISTRICT_TOWNS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=VOTING_DISTRICT_TOWNS)
+
+DEMOGRAPHIC_DATA_DISTRICT_SENATE = "demographicDataDistrictSenate"
+DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_DATA_DISTRICT_SENATE)
+
+DEMOGRAPHIC_DATA_DISTRICT_HOUSE = "demographicDataDistrictHouse"
+DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_DATA_DISTRICT_HOUSE)
+
+
+
 DEMOGRAPHIC_DATA_COUNTY = "demographicDataCounty"
 DEMOGRAPHIC_DATA_COUNTY_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_DATA_COUNTY)
 
