@@ -235,6 +235,17 @@ Retrieves summary demographic data for all facts by county and town. Displays ma
 
 ```
 
+### Voting District Towns
+Maps voting district for state senate and house races to the list of towns in each district.
+```
+{
+    "Type" : "Senate",
+    "District" : "2nd Middlesex and Norfolk",
+    "Towns" : [ "Ashland", "Framingham", "Franklin", "Holliston", "Hopkinton", "Medway", "Natick" ]
+}
+
+```
+
 ## Additional Python Libraries
 You may need to import the following libraries to access our datasets: bs4, pandas, requests, csv, io
 
