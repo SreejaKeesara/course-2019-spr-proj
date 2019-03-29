@@ -44,7 +44,7 @@ class transformationWeightedHouseIdeology(dml.Algorithm):
         repo.authenticate(TEAM_NAME, TEAM_NAME)
 
 
-        electionsByDistrict = list(repo[STATE_HOUSE_ELECTIONS_NAME].find({}))
+        electionsByDistrict = list(repo[STATE_HOUSE_ELECTIONS_NAME].find({ "year": { "$gte": 2010 } }))
         finalAvgsByDistrict = {}
 
 
