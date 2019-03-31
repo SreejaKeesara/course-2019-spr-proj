@@ -59,32 +59,34 @@ class demographicDataDistrictSenate(dml.Algorithm):
         # Retrieve towns associated with each senate district
 
         # Filter by senate
-        senate = repo[VOTING_DISTRICT_TOWNS_NAME].find({"Type" : "Senate"})
-        for record in senate:
-            district = record.get("District")
-            towns = record.get("Towns")
-
-            townList = []
-            for town in towns:
-                town = "/^" + town + "/"
-                townList += [town]
-
-            doc = repo[DEMOGRAPHIC_DATA_TOWN_NAME].find({"Town" : {"$in:" [townList]}}).aggregate()
-
-
-
-
-        keys = []
-        for key in document:
-            keys += [key]
-
-
-        # Insert rows into collection
-        repo.dropCollection(DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME)
-        repo.createCollection(DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME)
-        repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].insert_many(records)
-        repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].metadata({'complete': True})
-        print(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].metadata())
+        # senate = repo[VOTING_DISTRICT_TOWNS_NAME].find({"Type" : "Senate"})
+        # for record in senate:
+        #     district = record.get("District")
+        #     towns = record.get("Towns")
+        #
+        #     townList = []
+        #     for town in towns:
+        #         town = "/^" + town + "/"
+        #         townList += [town]
+        #
+        #     doc = repo[DEMOGRAPHIC_DATA_TOWN_NAME].find({"Town" : {"$in:" [townList]}}).aggregate(
+        #         ""
+        #     )
+        #
+        #
+        #
+        #
+        # keys = []
+        # for key in document:
+        #     keys += [key]
+        #
+        #
+        # # Insert rows into collection
+        # repo.dropCollection(DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME)
+        # repo.createCollection(DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME)
+        # repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].insert_many(records)
+        # repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].metadata({'complete': True})
+        # print(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].metadata())
 
         repo.logout()
 
