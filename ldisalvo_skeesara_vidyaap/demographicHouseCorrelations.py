@@ -16,15 +16,15 @@ import prov.model
 
 from scipy import stats
 
-from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, DEMOGRAPHIC_DATA_DISTRICT_SENATE, \
-    DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME, WEIGHTED_SENATE_IDEOLOGIES_NAME, DEMOGRAPHIC_SENATE_DEM_CORRELATIONS, \
-    DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME, DEMOGRAPHIC_SENATE_REP_CORRELATIONS, DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME
+from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, DEMOGRAPHIC_DATA_DISTRICT_HOUSE, \
+    DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME, WEIGHTED_HOUSE_IDEOLOGIES_NAME, DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS, \
+    DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME, DEMOGRAPHIC_HOUSE_REP_CORRELATIONS, DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME
 
 
-class demographicSenateCorrelations(dml.Algorithm):
+class demographicHouseCorrelations(dml.Algorithm):
     contributor = TEAM_NAME
-    reads = [DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME, WEIGHTED_SENATE_IDEOLOGIES_NAME]
-    writes = [DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME, DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME]
+    reads = [DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME, WEIGHTED_HOUSE_IDEOLOGIES_NAME]
+    writes = [DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME, DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME]
 
     @staticmethod
     def execute(trial=False):
@@ -54,15 +54,15 @@ class demographicSenateCorrelations(dml.Algorithm):
         repo.authenticate(TEAM_NAME, TEAM_NAME)
 
 
-        demographicSenate = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({ "year": { "$gte": 2010 } }))
+        demographicHouse = list(repo[DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME].find({ "year": { "$gte": 2010 } }))
         # empty dictionaries to be of the form {stat_name: [[ideology ratio],[stat]], stat_name:[[],[]], ...}
         pointsDem = {}
         pointsRep = {}
 
 
-        for tup in demographicSenate:
+        for tup in demographicHouse:
             # find the row in weighted senate ideologies for this district to get the ratios
-            ratios = list(repo[WEIGHTED_SENATE_IDEOLOGIES_NAME].find(
+            ratios = list(repo[WEIGHTED_HOSUE_IDEOLOGIES_NAME].find(
                 {"district":tup["District"]
                  }))[0]
 
@@ -110,18 +110,18 @@ class demographicSenateCorrelations(dml.Algorithm):
 
 
         # create database for the Democratic correlations
-        repo.dropCollection(DEMOGRAPHIC_SENATE_DEM_CORRELATIONS)
-        repo.createCollection(DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME)
-        repo[DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME].insert_many(corrs_dem)
-        repo[DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME].metadata({'complete': True})
-        print(repo[DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME].metadata())
+        repo.dropCollection(DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS)
+        repo.createCollection(DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME)
+        repo[DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME].insert_many(corrs_dem)
+        repo[DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME].metadata({'complete': True})
+        print(repo[DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME].metadata())
 
         # create database for the Republican correlations
-        repo.dropCollection(DEMOGRAPHIC_SENATE_REP_CORRELATIONS)
-        repo.createCollection(DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME)
-        repo[DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME].insert_many(corrs_rep)
-        repo[DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME].metadata({'complete': True})
-        print(repo[DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME].metadata())
+        repo.dropCollection(DEMOGRAPHIC_HOUSE_REP_CORRELATIONS)
+        repo.createCollection(DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME)
+        repo[DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME].insert_many(corrs_rep)
+        repo[DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME].metadata({'complete': True})
+        print(repo[DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME].metadata())
 
 
         repo.logout()
@@ -149,35 +149,35 @@ class demographicSenateCorrelations(dml.Algorithm):
                           'http://datamechanics.io/ontology#')  # 'Extension', 'DataResource', 'DataSet', 'Retrieval', 'Query', or 'Computation'.
         doc.add_namespace('log', 'http://datamechanics.io/log/')  # The event log.
 
-        this_script = doc.agent('alg:ldisalvo_skeesara_vidyaap#demographicSenateCorrelations',
+        this_script = doc.agent('alg:ldisalvo_skeesara_vidyaap#demographicHouseCorrelations',
                                 {prov.model.PROV_TYPE: prov.model.PROV['SoftwareAgent'], 'ont:Extension': 'py'})
-        demographicSenateDataEntity = doc.entity('dat:' + TEAM_NAME + '#demographicDataDistrictSenate',
-                                               {prov.model.PROV_LABEL: '2017 Census Data by District for State Senate',
+        demographicHouseDataEntity = doc.entity('dat:' + TEAM_NAME + '#demographicDataDistrictHouse',
+                                               {prov.model.PROV_LABEL: '2017 Census Data by District for State House',
                                                 prov.model.PROV_TYPE: 'ont:DataSet'})
-        weightedSenateIdeologyEntity = doc.entity('dat:' + TEAM_NAME + '#transformationWeightedSenateIdeology', {
-            prov.model.PROV_LABEL: 'State Senate voting patterns',
+        weightedHouseIdeologyEntity = doc.entity('dat:' + TEAM_NAME + '#transformationWeightedHouseIdeology', {
+            prov.model.PROV_LABEL: 'State House voting patterns',
             prov.model.PROV_TYPE: 'ont:DataSet'})
 
-        get_senate_correlations = doc.activity('log:uuid' + str(uuid.uuid4()), startTime, endTime)
-        doc.wasAssociatedWith(get_senate_correlations, this_script)
+        get_house_correlations = doc.activity('log:uuid' + str(uuid.uuid4()), startTime, endTime)
+        doc.wasAssociatedWith(get_house_correlations, this_script)
 
-        doc.usage(get_senate_correlations, demographicSenateDataEntity, startTime, None,
+        doc.usage(get_house_correlations, demographicHouseDataEntity, startTime, None,
                   {prov.model.PROV_TYPE: 'ont:Computation',
                    'ont:Query': 'Name'
                    }
                   )
-        doc.usage(get_senate_correlations, weightedSenateIdeologyEntity, startTime, None,
+        doc.usage(get_house_correlations, weightedHouseIdeologyEntity, startTime, None,
                   {prov.model.PROV_TYPE: 'ont:Computation',
                    'ont:Query': 'Election ID'
                    }
                   )
 
-        senate_correlations = doc.entity('dat:ldisalvo_skeesara_vidyaap#demographicSenateCorrelations',
+        house_correlations = doc.entity('dat:ldisalvo_skeesara_vidyaap#demographicSenateCorrelations',
                           {prov.model.PROV_LABEL: 'Correlations between Census data and Senate voting patterns', prov.model.PROV_TYPE: 'ont:DataSet'})
-        doc.wasAttributedTo(senate_correlations, this_script)
-        doc.wasGeneratedBy(senate_correlations, get_senate_correlations, endTime)
-        doc.wasDerivedFrom(senate_correlations, demographicSenateDataEntity, get_senate_correlations, get_senate_correlations, get_senate_correlations)
-        doc.wasDerivedFrom(senate_correlations, weightedSenateIdeologyEntity, get_senate_correlations, get_senate_correlations, get_senate_correlations)
+        doc.wasAttributedTo(house_correlations, this_script)
+        doc.wasGeneratedBy(house_correlations, get_house_correlations, endTime)
+        doc.wasDerivedFrom(house_correlations, demographicHouseDataEntity, get_house_correlations, get_house_correlations, get_house_correlations)
+        doc.wasDerivedFrom(house_correlations, weightedHouseIdeologyEntity, get_house_correlations, get_house_correlations, get_house_correlations)
 
         repo.logout()
 
