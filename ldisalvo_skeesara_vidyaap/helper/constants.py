@@ -61,6 +61,13 @@ SUMMARY_DEMOGRAPHICS_METRICS = "summaryDemographicsMetrics"
 SUMMARY_DEMOGRAPHICS_METRICS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=SUMMARY_DEMOGRAPHICS_METRICS)
 
 
+DEMOGRAPHIC_SENATE_CORRELATIONS = "demographicSenateCorrelations"
+DEMOGRAPHIC_SENATE_CORRELATIONS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_SENATE_CORRELATIONS)
+
+
+DEMOGRAPHIC_HOUSE_CORRELATIONS = "demographicHouseCorrelations"
+DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_HOUSE_CORRELATIONS)
+
 # electionstats URLs
 BALLOT_QUESTION_2000_2018_URL = "http://electionstats.state.ma.us/ballot_questions/search/year_from:2000/year_to:2018"
 STATE_HOUSE_GENERAL_2000_2018_URL = "http://electionstats.state.ma.us/elections/search/year_from:2000/year_to:2018/office_id:8/stage:General"
