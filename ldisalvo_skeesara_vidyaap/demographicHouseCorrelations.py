@@ -16,15 +16,15 @@ import prov.model
 
 from scipy import stats
 
-from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, DEMOGRAPHIC_DATA_DISTRICT_HOUSE, \
-    DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME, WEIGHTED_HOUSE_IDEOLOGIES_NAME, DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS, \
-    DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME, DEMOGRAPHIC_HOUSE_REP_CORRELATIONS, DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME
+from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, \
+    DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME, WEIGHTED_HOUSE_IDEOLOGIES_NAME, DEMOGRAPHIC_HOUSE_CORRELATIONS, \
+    DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME
 
 
 class demographicHouseCorrelations(dml.Algorithm):
     contributor = TEAM_NAME
     reads = [DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME, WEIGHTED_HOUSE_IDEOLOGIES_NAME]
-    writes = [DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME, DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME]
+    writes = [DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME]
 
     @staticmethod
     def execute(trial=False):
@@ -54,7 +54,7 @@ class demographicHouseCorrelations(dml.Algorithm):
         repo.authenticate(TEAM_NAME, TEAM_NAME)
 
 
-        demographicHouse = list(repo[DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME].find({ "year": { "$gte": 2010 } }))
+        demographicHouse = list(repo[DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME].find({}))
         # empty dictionaries to be of the form {stat_name: [[ideology ratio],[stat]], stat_name:[[],[]], ...}
         pointsDem = {}
         pointsRep = {}
@@ -62,18 +62,19 @@ class demographicHouseCorrelations(dml.Algorithm):
 
         for tup in demographicHouse:
             # find the row in weighted senate ideologies for this district to get the ratios
-            ratios = list(repo[WEIGHTED_HOSUE_IDEOLOGIES_NAME].find(
-                {"district":tup["District"]
-                 }))[0]
+            ratios = list(repo[WEIGHTED_HOUSE_IDEOLOGIES_NAME].find(
+                {"district":tup["House District"]
+                 }))
 
-            # get the ratio of how Democratic or Republican this district is
-            dem_ratio = ratios["Democratic ratio"]
-            rep_ratio = ratios["Republican ratio"]
+            if len(ratios) != 0:
+                # get the ratio of how Democratic or Republican this district is
+                dem_ratio = ratios[0]["Democratic ratio"]
+                rep_ratio = ratios[0]["Republican ratio"]
 
             # go through all the stats for this district and add to individual lists to
             # later make points of the form (ratio, stat)
             for key in tup:
-                if key != "District":
+                if key != "House District" and key != "_id":
                     # add the (ratio, stat) point for the current stat for this district to the Democratic points list
                     if key in pointsDem:
                         pointsDem[key][0] += [dem_ratio]
@@ -89,8 +90,8 @@ class demographicHouseCorrelations(dml.Algorithm):
                         pointsRep[key] = [[rep_ratio], [tup[key]]]
 
         # empty dictionaries that will eventually be of the form {stat_name: correlation, stat_name: correlation, ...}
-        corrs_dem = {}
-        corrs_rep = {}
+        corrs_dem = {"Party": "Democratic"}
+        corrs_rep = {"Party": "Republican"}
 
         # go through the points with the Democratic ratios and find the correlation for each stat
         for key in pointsDem:
@@ -109,20 +110,15 @@ class demographicHouseCorrelations(dml.Algorithm):
             corrs_rep[key] = corr
 
 
-        # create database for the Democratic correlations
-        repo.dropCollection(DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS)
-        repo.createCollection(DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME)
-        repo[DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME].insert_many(corrs_dem)
-        repo[DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME].metadata({'complete': True})
-        print(repo[DEMOGRAPHIC_HOUSE_DEM_CORRELATIONS_NAME].metadata())
+        total_corrs = [corrs_dem, corrs_rep]
 
-        # create database for the Republican correlations
-        repo.dropCollection(DEMOGRAPHIC_HOUSE_REP_CORRELATIONS)
-        repo.createCollection(DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME)
-        repo[DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME].insert_many(corrs_rep)
-        repo[DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME].metadata({'complete': True})
-        print(repo[DEMOGRAPHIC_HOUSE_REP_CORRELATIONS_NAME].metadata())
 
+        # create database for the correlations
+        repo.dropCollection(DEMOGRAPHIC_HOUSE_CORRELATIONS)
+        repo.createCollection(DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME)
+        repo[DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME].insert_many(total_corrs)
+        repo[DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME].metadata({'complete': True})
+        print(repo[DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME].metadata())
 
         repo.logout()
 
@@ -193,3 +189,5 @@ print(doc.get_provn())
 print(json.dumps(json.loads(doc.serialize()), indent=4))
 '''
 ## eof
+t = demographicHouseCorrelations()
+t.execute()

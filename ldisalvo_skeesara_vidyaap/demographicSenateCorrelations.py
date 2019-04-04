@@ -16,15 +16,15 @@ import prov.model
 
 from scipy import stats
 
-from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, DEMOGRAPHIC_DATA_DISTRICT_SENATE, \
-    DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME, WEIGHTED_SENATE_IDEOLOGIES_NAME, DEMOGRAPHIC_SENATE_DEM_CORRELATIONS, \
-    DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME, DEMOGRAPHIC_SENATE_REP_CORRELATIONS, DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME
+from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, \
+    DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME, WEIGHTED_SENATE_IDEOLOGIES_NAME, DEMOGRAPHIC_SENATE_CORRELATIONS, \
+    DEMOGRAPHIC_SENATE_CORRELATIONS_NAME
 
 
 class demographicSenateCorrelations(dml.Algorithm):
     contributor = TEAM_NAME
     reads = [DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME, WEIGHTED_SENATE_IDEOLOGIES_NAME]
-    writes = [DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME, DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME]
+    writes = [DEMOGRAPHIC_SENATE_CORRELATIONS_NAME]
 
     @staticmethod
     def execute(trial=False):
@@ -54,7 +54,8 @@ class demographicSenateCorrelations(dml.Algorithm):
         repo.authenticate(TEAM_NAME, TEAM_NAME)
 
 
-        demographicSenate = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({ "year": { "$gte": 2010 } }))
+        demographicSenate = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({}))
+        # "year": { "$gte": 2010 }
         # empty dictionaries to be of the form {stat_name: [[ideology ratio],[stat]], stat_name:[[],[]], ...}
         pointsDem = {}
         pointsRep = {}
@@ -63,17 +64,18 @@ class demographicSenateCorrelations(dml.Algorithm):
         for tup in demographicSenate:
             # find the row in weighted senate ideologies for this district to get the ratios
             ratios = list(repo[WEIGHTED_SENATE_IDEOLOGIES_NAME].find(
-                {"district":tup["District"]
-                 }))[0]
+                {"district":tup["Senate District"],
+                 }))
 
-            # get the ratio of how Democratic or Republican this district is
-            dem_ratio = ratios["Democratic ratio"]
-            rep_ratio = ratios["Republican ratio"]
+            if len(ratios) != 0:
+                # get the ratio of how Democratic or Republican this district is
+                dem_ratio = ratios[0]["Democratic ratio"]
+                rep_ratio = ratios[0]["Republican ratio"]
 
             # go through all the stats for this district and add to individual lists to
             # later make points of the form (ratio, stat)
             for key in tup:
-                if key != "District":
+                if key != "Senate District" and key != "_id":
                     # add the (ratio, stat) point for the current stat for this district to the Democratic points list
                     if key in pointsDem:
                         pointsDem[key][0] += [dem_ratio]
@@ -89,8 +91,8 @@ class demographicSenateCorrelations(dml.Algorithm):
                         pointsRep[key] = [[rep_ratio], [tup[key]]]
 
         # empty dictionaries that will eventually be of the form {stat_name: correlation, stat_name: correlation, ...}
-        corrs_dem = {}
-        corrs_rep = {}
+        corrs_dem = {"Party": "Democratic"}
+        corrs_rep = {"Party": "Republican"}
 
         # go through the points with the Democratic ratios and find the correlation for each stat
         for key in pointsDem:
@@ -108,20 +110,14 @@ class demographicSenateCorrelations(dml.Algorithm):
             corr = stats.pearsonr(all_ratios, all_stats)[0]
             corrs_rep[key] = corr
 
+        total_corrs = [corrs_dem, corrs_rep]
 
-        # create database for the Democratic correlations
-        repo.dropCollection(DEMOGRAPHIC_SENATE_DEM_CORRELATIONS)
-        repo.createCollection(DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME)
-        repo[DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME].insert_many(corrs_dem)
-        repo[DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME].metadata({'complete': True})
-        print(repo[DEMOGRAPHIC_SENATE_DEM_CORRELATIONS_NAME].metadata())
-
-        # create database for the Republican correlations
-        repo.dropCollection(DEMOGRAPHIC_SENATE_REP_CORRELATIONS)
-        repo.createCollection(DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME)
-        repo[DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME].insert_many(corrs_rep)
-        repo[DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME].metadata({'complete': True})
-        print(repo[DEMOGRAPHIC_SENATE_REP_CORRELATIONS_NAME].metadata())
+        # create database for the correlations
+        repo.dropCollection(DEMOGRAPHIC_SENATE_CORRELATIONS)
+        repo.createCollection(DEMOGRAPHIC_SENATE_CORRELATIONS_NAME)
+        repo[DEMOGRAPHIC_SENATE_CORRELATIONS_NAME].insert_many(total_corrs)
+        repo[DEMOGRAPHIC_SENATE_CORRELATIONS_NAME].metadata({'complete': True})
+        print(repo[DEMOGRAPHIC_SENATE_CORRELATIONS_NAME].metadata())
 
 
         repo.logout()
