@@ -35,14 +35,11 @@ class canvassingBudgetConstraint(dml.Algorithm):
         repo.authenticate(TEAM_NAME, TEAM_NAME)
 
         # Get demographic data by voting district
-        # votingDistrictData = list(repo[VOTING_DISTRICT_TOWNS_NAME].find())
-        #
-        # for district in votingDistrictData:
-        #     towns = district["Towns"]
-        #     townPopDict = {}
+        targetDistrict = "9th Norfolk"
+        votingDistrictData = list(repo[VOTING_DISTRICT_TOWNS_NAME].find({"District": targetDistrict}))[0]
 
+        towns = votingDistrictData["Towns"]
 
-        towns = [ "Ashland", "Framingham", "Holliston", "Hopkinton", "Medway", "Natick" ]
         (x1, x2, x3, x4, x5, x6) = [z3.Real('x' + str(i)) for i in range(1, 7)]
         (p1, p2, p3, p4, p5, p6) = [z3.Real('p' + str(i)) for i in range(1, 7)]
         S = z3.Solver()
@@ -65,7 +62,7 @@ class canvassingBudgetConstraint(dml.Algorithm):
             S.add(z3.Or(x ==1, x == 0))
             # S.add(z3.And(x >= 0, x <= 1))
 
-        S.add(p1*x1 + p2*x2 + p3*x3 + p4*x4 + p5*x5 + p6*x6 <= 100000)
+        S.add(p1*x1 + p2*x2 + p3*x3 + p4*x4 + p5*x5 + p6*x6 <= 50000)
 
         print(S.check())
         print(S.model())
