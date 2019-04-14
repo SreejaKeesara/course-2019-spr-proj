@@ -62,8 +62,11 @@ class canvassingBudgetConstraint(dml.Algorithm):
         repo = client.repo
         repo.authenticate(TEAM_NAME, TEAM_NAME)
 
-        # Get full list of voting districts and towns within them
-        votingDistricts = list(repo[VOTING_DISTRICT_TOWNS_NAME].find())
+        # Get full list of voting districts and towns within them (limit 50 if trial flag set)
+        if trial:
+            votingDistricts = list(repo[VOTING_DISTRICT_TOWNS_NAME].find().limit(50))
+        else:
+            votingDistricts = list(repo[VOTING_DISTRICT_TOWNS_NAME].find())
         rows = []
 
         # Iterate through each district to perform the constraint problem:

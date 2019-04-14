@@ -55,7 +55,11 @@ class stateSenateElections(dml.Algorithm):
         # Get HTML of page and pull all election divs
         raw_html = scraper.simple_get(STATE_SENATE_GENERAL_2000_2018_URL)
         html = BeautifulSoup(raw_html, 'html.parser')
-        electionsList = html.findAll("tr", {"class": "election_item"})
+
+        if trial:
+            electionsList = html.findAll("tr", {"class": "election_item"})[:10]
+        else:
+            electionsList = html.findAll("tr", {"class": "election_item"})
 
         electionsRows = []
 

@@ -43,6 +43,10 @@ class ballotQuestions(dml.Algorithm):
         """
         startTime = datetime.datetime.now()
 
+        if trial:
+            endTime = datetime.datetime.now()
+            return {"start": startTime, "end": endTime}
+
         # Set up the database connection.
         client = dml.pymongo.MongoClient()
         repo = client.repo
