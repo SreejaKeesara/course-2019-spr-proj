@@ -284,6 +284,8 @@ Constraint Satisfaction: We chose to solve the canvassing problem on a voting di
 
 Statistical Analysis: In order to determine any strong predictors of voting ideology by district, we used the 2017 demographic data by district and the weighted ideology tables to create a table of correlation coefficients comparing demographic information and voting ideology.  The coefficients compare each piece of demographic data with "how Democratic" and  "how Republican" each district is.  The higher the coefficient, the more correlated that demographic information is with the likelihood of that district voting a certain way.
 
+Note: When trial mode is enabled, running time is cut from 2 minutes and 30 seconds to 28 seconds. 
+
 ## Datasets
 ### Canvassing Budget Constraint
 Determines which towns within a voting district can be canvassed within a specified canvassing budget (in number of people).
