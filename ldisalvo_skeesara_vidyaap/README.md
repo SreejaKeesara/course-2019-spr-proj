@@ -132,7 +132,9 @@ source: http://datamechanics.io/data/massachusetts_counties.csv
 }
 ```
 ### demographicDataCounty
-contains: demographic data for Massachusetts by county from census.gov (to see full list of fields, go to https://www.census.gov/quickfacts/fact/table/ma/PST045217)
+contains: demographic data for Massachusetts by county from census.gov, to see full list of fields, go to:
+ 
+source:https://www.census.gov/quickfacts/fact/table/ma/PST045217
 ```
 { "Barnstable County, Massachusetts":
    "Population estimates, July 1, 2017,  (V2017)": "213,444",
@@ -146,7 +148,9 @@ contains: demographic data for Massachusetts by county from census.gov (to see f
 ```
 
 ### demographicDataTown
-contains: demographic data for Massachusetts by town from census.gov (to see full list of fields, go to https://www.census.gov/quickfacts/fact/table/ma/PST045217)
+contains: demographic data for Massachusetts by city and town from census.gov and includes the data retreived from demographicDataCity, to see full list of fields, go to:
+
+source: https://www.census.gov/quickfacts/fact/table/ma/PST045217)
 ```
 { "Winchester town, Middlesex County, Massachusetts":
   "Population estimates, July 1, 2017,  (V2017)": "23,339",
@@ -156,6 +160,8 @@ contains: demographic data for Massachusetts by town from census.gov (to see ful
   ..........................
 }
 ```
+
+
 
 ## Transformations
 ### House District Ideology
@@ -246,10 +252,33 @@ Maps voting district for state senate and house races to the list of towns in ea
 
 ```
 
-## Project 2 - Narrative
-Problem: How do we create a profile of each local voting district in Massachusetts that allows campaigns or political groups to determine which neighborhoods to canvass in and which demographic factors regularly correlate with election outcomes?
+### demographicDataDistrictHouse
+Retrieves average demographic data by house district for Massachusetts.
+```
+     {  "House District" : "10th Bristol" ,
+        "Population estimates, July 1, 2017,  (V2017)" : 64728,
+        "Population estimates base, April 1, 2010,  (V2017)" : 64552,
+        "Population, Census, April 1, 2010" : 64552,
+        ..........................
+     }
+```
 
-To do this, we had to create demographic profiles of each voting district. We did this through several preliminary datasets. We created Voting District Towns which contains a mapping of all the towns within each voting district. The districts are also classified by state senate or house. We also created Demographic Data District House and Demographic Data District Senate datasets. These two scripts used the Voting District Towns dataset and the Demographic Data Town dataset to determine which towns made up a district and to average the numbers for a certain demographic statistic across all the towns to determine the statistic for the entire district. Once we did the above, we were able to proceed with our statistical analysis and constraint satisfaction problems. 
+### demographicDataDistrictSenate
+Retrieves average demographic data by senate district for Massachusetts.
+```
+     {  "Senate District" : "2nd Middlesex and Norfolk" 
+        "Population estimates, July 1, 2017,  (V2017)" : 29299.571428571428, 
+        "Population estimates base, April 1, 2010,  (V2017)" : 27253, 
+        "Population, Census, April 1, 2010" : 27253.714285714286, 
+        "Persons under 5 years, percent" : 5.985714285714286,  }
+        ..........................
+     }
+```
+
+## Project 2 - Narrative
+Problem: How do we use demographic factors to create a profile of local voting districts in Massachusetts that allows campaigns or political groups to determine which neighborhoods to canvass in?
+
+To do this, we created demographic profiles of each voting district. We did this through several preliminary datasets. We created Voting District Towns which contains a mapping of all the towns within each voting district. The districts are also classified by state senate or house. We also created Demographic Data District House and Demographic Data District Senate datasets. These two scripts used the Voting District Towns dataset and the Demographic Data Town dataset to determine which towns made up a district and to average the numbers for a certain demographic statistic across all the towns to determine the statistic for the entire district. Once we did the above, we were able to proceed with our statistical analysis and constraint satisfaction problems. 
 
 Constraint Satisfaction: We chose to solve the canvassing problem on a voting district level. Each voting district consists of neighborhoods for which we have demographic data. Given a budgeting constraint of X number of people that can be canvassed, we want to solve the problem of which neighborhoods within the district can be visited without going over the total district budget. We decided to use the z3-Solver library to solve this constraint problem for each district. Each neighborhood within a district is a z3 variable that can either be assigned a 0 (do not canvass) or a 1 (do canvass). The constraints use the population of each neighborhood to weight which ones to visit.
 
