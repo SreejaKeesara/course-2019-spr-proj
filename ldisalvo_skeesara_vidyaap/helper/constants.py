@@ -39,8 +39,6 @@ DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME = "ldisalvo_skeesara_vidyaap.{name}".forma
 DEMOGRAPHIC_DATA_DISTRICT_HOUSE = "demographicDataDistrictHouse"
 DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_DATA_DISTRICT_HOUSE)
 
-
-
 DEMOGRAPHIC_DATA_COUNTY = "demographicDataCounty"
 DEMOGRAPHIC_DATA_COUNTY_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_DATA_COUNTY)
 
@@ -56,14 +54,11 @@ WEIGHTED_HOUSE_IDEOLOGIES_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=
 DEMOGRAPHIC_DATA_TOWN = "demographicDataTown"
 DEMOGRAPHIC_DATA_TOWN_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_DATA_TOWN)
 
-
 SUMMARY_DEMOGRAPHICS_METRICS = "summaryDemographicsMetrics"
 SUMMARY_DEMOGRAPHICS_METRICS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=SUMMARY_DEMOGRAPHICS_METRICS)
 
-
 DEMOGRAPHIC_SENATE_CORRELATIONS = "demographicSenateCorrelations"
 DEMOGRAPHIC_SENATE_CORRELATIONS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_SENATE_CORRELATIONS)
-
 
 DEMOGRAPHIC_HOUSE_CORRELATIONS = "demographicHouseCorrelations"
 DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_HOUSE_CORRELATIONS)
@@ -76,32 +71,29 @@ STATE_SENATE_GENERAL_2000_2018_URL = "http://electionstats.state.ma.us/elections
 BALLOT_QUESTION_DOWNLOAD_RESULTS_URL = "http://electionstats.state.ma.us/ballot_questions/download/{id}/precincts_include:1/"
 ELECTION_DOWNLOAD_RESULTS_URL = "http://electionstats.state.ma.us/elections/download/{id}/precincts_include:1/"
 
-
 # geographic data
-MA_CITY_LIST = ["Westfield city, Massachusetts", "Pittsfield city, Massachusetts",
-                "Agawam Town city, Massachusetts", "Amesbury Town city, Massachusetts", "Attleboro city, Massachusetts", "Barnstable Town city, Massachusetts",
-                 "Beverly city, Massachusetts", "Bliss Corner CDP, Massachusetts",
-                "Boston city, Massachusetts", "Braintree Town city, Massachusetts",
-                "Brockton city, Massachusetts",
-                "Cambridge city, Massachusetts", "Chelsea city, Massachusetts", "Chicopee city, Massachusetts",
-                "Cochituate CDP, Massachusetts", "East Falmouth CDP, Massachusetts", "Easthampton Town city, Massachusetts",
-                "Everett city, Massachusetts", "Fall River city, Massachusetts", "Fitchburg city, Massachusetts","Franklin Town city, Massachusetts",
+MA_CITY_LIST = ["Westfield city, Massachusetts", "Pittsfield city, Massachusetts", "Agawam Town city, Massachusetts",
+                "Amesbury Town city, Massachusetts", "Attleboro city, Massachusetts", "Barnstable Town city, Massachusetts",
+                "Beverly city, Massachusetts", "Bliss Corner CDP, Massachusetts", "Boston city, Massachusetts",
+                "Braintree Town city, Massachusetts", "Brockton city, Massachusetts", "Cambridge city, Massachusetts",
+                "Chelsea city, Massachusetts", "Chicopee city, Massachusetts", "Cochituate CDP, Massachusetts",
+                "East Falmouth CDP, Massachusetts", "Easthampton Town city, Massachusetts", "Everett city, Massachusetts",
+                "Fall River city, Massachusetts", "Fitchburg city, Massachusetts","Franklin Town city, Massachusetts",
                 "Gardner city, Massachusetts", "Gloucester city, Massachusetts", "Greenfield Town city, Massachusetts",
-                "Haverhill city, Massachusetts",
-                "Holyoke city, Massachusetts",  "Lawrence city, Massachusetts", "Leominster city, Massachusetts", "Lowell city, Massachusetts",
-                "Lynn city, Massachusetts", "Malden city, Massachusetts", "Marlborough city, Massachusetts", "Medford city, Massachusetts",
-                "Melrose city, Massachusetts", "Methuen Town city, Massachusetts", "New Bedford city, Massachusetts", "Newburyport city, Massachusetts",
-                "Newton city, Massachusetts", "North Adams city, Massachusetts", "North Amherst CDP, Massachusetts",
-                "North Scituate CDP, Massachusetts", "Northampton city, Massachusetts", "Palmer Town city, Massachusetts",
-                "Peabody city, Massachusetts", "Pinehurst CDP, Massachusetts", "Plymouth CDP, Massachusetts",
-                "Quincy city, Massachusetts",
-                "Revere city, Massachusetts", "Salem city, Massachusetts",
-                "Somerville city, Massachusetts", "South Yarmouth CDP, Massachusetts", "Southbridge Town city, Massachusetts", "Springfield city, Massachusetts",
-                "Swampscott CDP, Massachusetts", "Taunton city, Massachusetts", "Waltham city, Massachusetts",
-                "Watertown Town city, Massachusetts",
-                "West Concord CDP, Massachusetts", "West Springfield Town city, Massachusetts", "West Yarmouth CDP, Massachusetts",
-                "Weymouth Town city, Massachusetts", "Whitinsville CDP, Massachusetts", "Winthrop Town city, Massachusetts", "Woburn city, Massachusetts",
-                "Worcester city, Massachusetts"]
+                "Haverhill city, Massachusetts", "Holyoke city, Massachusetts",  "Lawrence city, Massachusetts",
+                "Leominster city, Massachusetts", "Lowell city, Massachusetts", "Lynn city, Massachusetts",
+                "Malden city, Massachusetts", "Marlborough city, Massachusetts", "Medford city, Massachusetts",
+                "Melrose city, Massachusetts", "Methuen Town city, Massachusetts", "New Bedford city, Massachusetts",
+                "Newburyport city, Massachusetts", "Newton city, Massachusetts", "North Adams city, Massachusetts",
+                "North Amherst CDP, Massachusetts", "North Scituate CDP, Massachusetts", "Northampton city, Massachusetts",
+                "Palmer Town city, Massachusetts", "Peabody city, Massachusetts", "Pinehurst CDP, Massachusetts",
+                "Plymouth CDP, Massachusetts", "Quincy city, Massachusetts", "Revere city, Massachusetts",
+                "Salem city, Massachusetts", "Somerville city, Massachusetts", "South Yarmouth CDP, Massachusetts",
+                "Southbridge Town city, Massachusetts", "Springfield city, Massachusetts", "Swampscott CDP, Massachusetts",
+                "Taunton city, Massachusetts", "Waltham city, Massachusetts", "Watertown Town city, Massachusetts",
+                "West Concord CDP, Massachusetts", "West Springfield Town city, Massachusetts",
+                "West Yarmouth CDP, Massachusetts", "Weymouth Town city, Massachusetts", "Whitinsville CDP, Massachusetts",
+                "Winthrop Town city, Massachusetts", "Woburn city, Massachusetts", "Worcester city, Massachusetts"]
 
 MA_COUNTY_LIST = ["Barnstable County", "Berkshire County", "Bristol County", "Dukes County", "Essex County",
                   "Franklin County", "Hampden County", "Hampshire County","Middlesex County", "Nantucket County",

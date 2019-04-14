@@ -1,7 +1,7 @@
 """
 CS504 : demographicDataDistrictSenate.py
 Team : Vidya Akavoor, Lauren DiSalvo, Sreeja Keesara
-Description : Retrieval of demographic data by district
+Description : Retrieval of average demographic data by district
 
 
 March 29, 2019
@@ -25,19 +25,14 @@ class demographicDataDistrictHouse(dml.Algorithm):
     writes = [DEMOGRAPHIC_DATA_DISTRICT_HOUSE_NAME]
 
     @staticmethod
-    # TODO: Fix comment description
     def execute(trial=False):
         """
-        TODO: FIX THIS DESCRIPTION JSON!!!
-            Retrieve average demographic data by Senate district and insert into collection
+            Retrieve average demographic data by House district and insert into collection
             ex)
-             { "Barnstable County, Massachusetts":
-                "Population estimates, July 1, 2017,  (V2017)": "213,444",
-                "Population estimates base, April 1, 2010,  (V2017)": "215,868",
-                "Population, percent change - April 1, 2010 (estimates base) to July 1, 2017,  (V2017)": "-1.1%",
-                "Population, Census, April 1, 2010": "215,888",
-                "Persons under 5 years, percent": "3.6%",
-                "Persons under 18 years, percent": "15.1%",
+             {  "House District" : "10th Bristol" ,
+                "Population estimates, July 1, 2017,  (V2017)" : 64728,
+                "Population estimates base, April 1, 2010,  (V2017)" : 64552,
+                "Population, Census, April 1, 2010" : 64552,
                 ..........................
             }
         """
@@ -57,7 +52,7 @@ class demographicDataDistrictHouse(dml.Algorithm):
         # Retrieve keys District (name), Towns (list)
         keys = keys[1:]
 
-        # Retrieve towns associated with each senate district
+        # Retrieve towns associated with each house district
         # Filter by House
         senate = repo[VOTING_DISTRICT_TOWNS_NAME].find({"Type" : "House"})
         records = []
@@ -78,6 +73,7 @@ class demographicDataDistrictHouse(dml.Algorithm):
 
             townList = townList[:-1]
 
+            # Group towns within district and compute average for each demographic statistic
             doc2 = repo[DEMOGRAPHIC_DATA_TOWN_NAME].aggregate(
                 [{"$match": {"Town" : re.compile(townList)}},
                  {"$group":{
@@ -197,28 +193,30 @@ class demographicDataDistrictHouse(dml.Algorithm):
         doc.add_namespace('ont',
                           'http://datamechanics.io/ontology#')  # 'Extension', 'DataResource', 'DataSet', 'Retrieval', 'Query', or 'Computation'.
         doc.add_namespace('log', 'http://datamechanics.io/log/')  # The event log.
-        doc.add_namespace('census', 'https://www.census.gov/quickfacts/fact/csv/')
 
-        this_script = doc.agent('alg:'+TEAM_NAME+'#demographicDataCounty',
+        this_script = doc.agent('alg:' + TEAM_NAME + '#demographicDataDistrictHouse',
                                 {prov.model.PROV_TYPE: prov.model.PROV['SoftwareAgent'],
                                  'ont:Extension': 'py'})
-        resource = doc.entity('census:table/ma/', {'prov:label': 'Census Data by County, Massachusetts',
-                                                prov.model.PROV_TYPE: 'ont:DataResource',
-                                                'ont:Extension': 'csv'})
-        get_demographicDataCounty = doc.activity('log:uuid' + str(uuid.uuid4()), startTime, endTime)
-        doc.wasAssociatedWith(get_demographicDataCounty, this_script)
-        doc.usage(get_demographicDataCounty, resource, startTime, None,
+
+        votingDistrictTownEntity = doc.entity('dat:' + TEAM_NAME + '#votingDistrictTownEntity',
+                                                 {prov.model.PROV_LABEL: 'Voting district town entity',
+                                                  prov.model.PROV_TYPE: 'ont:DataSet'})
+
+        get_demographicDataDistrictHouse = doc.activity('log:uuid' + str(uuid.uuid4()), startTime, endTime)
+        doc.wasAssociatedWith(get_demographicDataDistrictHouse, this_script)
+        doc.usage(get_demographicDataDistrictHouse, votingDistrictTownEntity, startTime, None,
                   {prov.model.PROV_TYPE: 'ont:Retrieval',
-                   'ont:Query': 'worcestercountymassachusetts,hampdencountymassachusetts,hampshirecountymassachusetts,'
-                                'franklincountymassachusetts,berkshirecountymassachusetts,ma/PST045218'
+                   'ont:Query': ''
                    }
                   )
 
-        demographicDataCountyEntity = doc.entity('dat:'+TEAM_NAME+'#demographicDataCounty', {prov.model.PROV_LABEL: 'Census Data by County, Massachusetts',
-                                                 prov.model.PROV_TYPE: 'ont:DataSet'})
-        doc.wasAttributedTo(demographicDataCountyEntity, this_script)
-        doc.wasGeneratedBy(demographicDataCountyEntity, get_demographicDataCounty, endTime)
-        doc.wasDerivedFrom(demographicDataCountyEntity, resource, get_demographicDataCounty, get_demographicDataCounty, get_demographicDataCounty)
+        demographicDataDistrictHouseEntity = doc.entity('dat:' + TEAM_NAME + '#demographicDataDistrictHouse', {
+            prov.model.PROV_LABEL: 'Demographic data by house district',
+            prov.model.PROV_TYPE: 'ont:DataSet'})
+        doc.wasAttributedTo(demographicDataDistrictHouseEntity, this_script)
+        doc.wasGeneratedBy(demographicDataDistrictHouseEntity, get_demographicDataDistrictHouse, endTime)
+        doc.wasDerivedFrom(demographicDataDistrictHouseEntity, votingDistrictTownEntity,
+                           get_demographicDataDistrictHouse, get_demographicDataDistrictHouse, get_demographicDataDistrictHouse)
 
         repo.logout()
 
