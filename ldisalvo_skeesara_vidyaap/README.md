@@ -314,7 +314,18 @@ Determines which towns within a voting district can be canvassed within a specif
 ```
 
 ### Voting District Election Outcome Factors
-[todo]
+```
+     {"_id" : ObjectId("5ca6479e3f7b1b6f24598da3"),
+      "Party" : "Democratic", 
+      "Population estimates, July 1, 2017,  (V2017)" : NaN, 
+      "Population estimates base, April 1, 2010,  (V2017)" : NaN, 
+      "Population, Census, April 1, 2010" : 0.35763757741202973, 
+      "Persons under 5 years, percent" : 0.16158614409129984, 
+      "Persons under 18 years, percent" : -0.24276258580942858, 
+      "Persons 65 years and over, percent" : -0.15693780305590088,
+      ...
+      }
+```
 
 
 ## Additional Python Libraries
