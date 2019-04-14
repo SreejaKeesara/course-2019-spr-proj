@@ -10,24 +10,50 @@ April 04, 2019
 
 import datetime
 import uuid
+import math
 
 import dml
 import prov.model
 import z3
 import re
 
-from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, VOTING_DISTRICT_TOWNS_NAME, DEMOGRAPHIC_DATA_TOWN_NAME
+from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, VOTING_DISTRICT_TOWNS_NAME, DEMOGRAPHIC_DATA_TOWN_NAME, CANVASSING_BUDGET_CONSTRAINT_NAME, CANVASSING_BUDGET_CONSTRAINT
 
 class canvassingBudgetConstraint(dml.Algorithm):
     contributor = TEAM_NAME
     reads = [VOTING_DISTRICT_TOWNS_NAME, DEMOGRAPHIC_DATA_TOWN_NAME]
-    writes = []
+    writes = [CANVASSING_BUDGET_CONSTRAINT_NAME]
 
     @staticmethod
     def execute(trial=False):
         """
-        Find which towns one can visit in a given district given a budget of the total number of people one can visit
+            Find which towns that can be canvassed in a given district given
+            a budget of the total number of people one can visit
 
+            ex) {
+                    "_id" : ObjectId("5cb367bd0a1aef089f1d060a"),
+                    "District" : "2nd Middlesex and Norfolk",
+                    "Type" : "Senate",
+                    "Budget (# of people)" : 100000,
+                    "Check" : "sat",
+                    "Excluded Towns" : [ ],
+                    "Model" : [
+                                [ "Ashland", 1 ],
+                                [ "Framingham", 1 ],
+                                [ "Franklin", 0 ],
+                                [ "Holliston", 0 ],
+                                [ "Hopkinton", 0 ],
+                                [ "Medway", 0 ],
+                                [ "Natick", 0 ],
+                                [ "popNatick", 36246 ],
+                                [ "popMedway", 13329 ],
+                                [ "popHopkinton", 18035 ],
+                                [ "popHolliston", 14753 ],
+                                [ "popFranklin", 32996 ],
+                                [ "popFramingham", 72032 ],
+                                [ "popAshland", 17706 ]
+                            ]
+                }
         """
         startTime = datetime.datetime.now()
 
@@ -36,48 +62,69 @@ class canvassingBudgetConstraint(dml.Algorithm):
         repo = client.repo
         repo.authenticate(TEAM_NAME, TEAM_NAME)
 
-        # Input district that we are looking for and get towns within that district
-        targetDistrict = "9th Norfolk"
-        votingDistrictData = list(repo[VOTING_DISTRICT_TOWNS_NAME].find({"District": targetDistrict}))[0]
+        # Get full list of voting districts and towns within them
+        votingDistricts = list(repo[VOTING_DISTRICT_TOWNS_NAME].find())
+        rows = []
 
-        # list of towns in district "targetDistrict"
-        towns = votingDistrictData["Towns"]
+        # Iterate through each district to perform the constraint problem:
+        # With enough budget to canvass 100,000 people in the district,
+        # which towns within that district should I canvass?
+        for district in votingDistricts:
+            towns = district["Towns"]
 
-        # set up z3 variables for towns (0,1) and their populations
-        # NOTE: we have hard coded six variables because we are assuming that we will know which district
-        #       we are looking at in advance. In this case it is "9th Norfolk"
-        (x1, x2, x3, x4, x5, x6) = [z3.Real('x' + str(i)) for i in range(1, 7)]
-        (p1, p2, p3, p4, p5, p6) = [z3.Real('p' + str(i)) for i in range(1, 7)]
-        S = z3.Solver()
+            # NOTE: We first need to make sure that demographic data is available for every town in this district.
+            #       If not, we remove that town from the constraint variables.
 
-        # empty list that will eventually hold the populations of each town in the district
-        popList = []
+            # Empty list that will eventually hold the populations of each town in the district
+            popList = []
+            availableTowns = []
+            excludedTowns = []
 
-        for town in towns:
-            townDemo = list(repo[DEMOGRAPHIC_DATA_TOWN_NAME].find({"Town": re.compile("^" + town + "")}))
-            if townDemo:
-                popList.append(townDemo[0]["Population estimates, July 1, 2017,  (V2017)"])
+            # Iterate through each town to get population (2017 estimates) if available
+            for town in towns:
+                townDemo = list(repo[DEMOGRAPHIC_DATA_TOWN_NAME].find({"Town": re.compile("^" + town + "")}))
+                if townDemo and not math.isnan(townDemo[0]["Population estimates, July 1, 2017,  (V2017)"]):
+                    popList.append(townDemo[0]["Population estimates, July 1, 2017,  (V2017)"])
+                    availableTowns.append(town)
+                else:
+                    excludedTowns.append(town)
 
-        # add the constraints saying what each town's population is
-        S.add(p1 == popList[0])
-        S.add(p2 == popList[1])
-        S.add(p3 == popList[2])
-        S.add(p4 == popList[3])
-        S.add(p5 == popList[4])
-        S.add(p6 == popList[5])
+            # Set up z3 variables for towns (0,1) and their populations
+            numTowns = len(availableTowns)
+            xs = [z3.Real(availableTowns[i]) for i in range(numTowns)]
+            ps = [z3.Real('pop' + availableTowns[i]) for i in range(numTowns)]
 
-        # add constraints saying that the "town" variables (x1-x6) must be either 0 or 1
-        # this represents whether we visit the town (1) or not (0)
-        for x in (x1, x2, x3, x4, x5, x6):
-            S.add(z3.Or(x ==1, x == 0))
-            # S.add(z3.And(x >= 0, x <= 1))
+            S = z3.Solver()
 
-        # add the constraint that says that the total number of people visited must not exceed the budget
-        # in this case 50,000 people
-        S.add(p1*x1 + p2*x2 + p3*x3 + p4*x4 + p5*x5 + p6*x6 <= 50000)
+            # Add the constraints saying what each town's population is and whether we visit that town (1) or not (0)
+            for i in range(numTowns):
+                S.add(ps[i] == popList[i])
+                S.add(z3.Or(xs[i] == 1, xs[i] == 0))
 
-        print(S.check())
-        print(S.model())
+            # Add constraint that total number of people visited must not exceed the budget (100,000 people)
+            totalPeopleVisited = sum([xs[j] * ps[j] for j in range(numTowns)])
+            S.add(totalPeopleVisited <= 100000)
+
+            # Build row to insert
+            row = {}
+            row["District"] = district["District"]
+            row["Type"] = district["Type"]
+            row["Budget (# of people)"] = 100000
+            row["Check"] = str(S.check())
+            row["Excluded Towns"] = excludedTowns
+
+            if str(S.check()) == "sat":
+                model = S.model()
+                row["Model"] = [(str(d), int(str(model[d]))) for d in model]
+
+            rows.append(row)
+
+        # Insert rows into collection
+        repo.dropCollection(CANVASSING_BUDGET_CONSTRAINT)
+        repo.createCollection(CANVASSING_BUDGET_CONSTRAINT)
+        repo[CANVASSING_BUDGET_CONSTRAINT_NAME].insert_many(rows)
+        repo[CANVASSING_BUDGET_CONSTRAINT_NAME].metadata({'complete': True})
+        print(repo[CANVASSING_BUDGET_CONSTRAINT_NAME].metadata())
 
         repo.logout()
 
@@ -105,17 +152,19 @@ class canvassingBudgetConstraint(dml.Algorithm):
 
         this_script = doc.agent('alg:ldisalvo_skeesara_vidyaap#canvassingBudgetConstraint',
                                 {prov.model.PROV_TYPE: prov.model.PROV['SoftwareAgent'], 'ont:Extension': 'py'})
-        votingDistrictTownEntity = doc.entity('dat:' + TEAM_NAME + '#votingDistrictTowns',
-                                               {prov.model.PROV_LABEL: 'The towns in each voting district',
-                                                prov.model.PROV_TYPE: 'ont:DataSet'})
+        voting_district_towns = doc.entity('dat:' + TEAM_NAME + '#votingDistrictTowns', {
+            prov.model.PROV_LABEL: 'Map of Voting Districts to List of Towns',
+            prov.model.PROV_TYPE: 'ont:DataSet'})
+
         demographicDataTownEntity = doc.entity('dat:' + TEAM_NAME + '#demographicDataTown', {
-            prov.model.PROV_LABEL: '2017 Census data from each town in MA',
+            prov.model.PROV_LABEL: 'Census Data by Town, Massachusetts',
             prov.model.PROV_TYPE: 'ont:DataSet'})
 
         get_canvassing_constraint = doc.activity('log:uuid' + str(uuid.uuid4()), startTime, endTime)
+
         doc.wasAssociatedWith(get_canvassing_constraint, this_script)
 
-        doc.usage(get_canvassing_constraint, votingDistrictTownEntity, startTime, None,
+        doc.usage(get_canvassing_constraint, voting_district_towns, startTime, None,
                   {prov.model.PROV_TYPE: 'ont:Computation',
                    'ont:Query': 'Name'
                    }
@@ -126,13 +175,13 @@ class canvassingBudgetConstraint(dml.Algorithm):
                    }
                   )
 
-        # house_correlations = doc.entity('dat:ldisalvo_skeesara_vidyaap#demographicSenateCorrelations',
-        #                   {prov.model.PROV_LABEL: 'Correlations between Census data and Senate voting patterns', prov.model.PROV_TYPE: 'ont:DataSet'})
-        # doc.wasAttributedTo(house_correlations, this_script)
-        # doc.wasGeneratedBy(house_correlations, get_house_correlations, endTime)
-        # doc.wasDerivedFrom(house_correlations, demographicHouseDataEntity, get_house_correlations, get_house_correlations, get_house_correlations)
-        # doc.wasDerivedFrom(house_correlations, weightedHouseIdeologyEntity, get_house_correlations, get_house_correlations, get_house_correlations)
-        #
+        canvassingBudgetConstraint = doc.entity('dat:' + TEAM_NAME + '#canvassingBudgetConstraint',
+                          {prov.model.PROV_LABEL: 'Determines towns to canvass based on budget and population for each voting district', prov.model.PROV_TYPE: 'ont:DataSet'})
+        doc.wasAttributedTo(canvassingBudgetConstraint, this_script)
+        doc.wasGeneratedBy(canvassingBudgetConstraint, get_canvassing_constraint, endTime)
+        doc.wasDerivedFrom(canvassingBudgetConstraint, demographicDataTownEntity, get_canvassing_constraint, get_canvassing_constraint, get_canvassing_constraint)
+        doc.wasDerivedFrom(canvassingBudgetConstraint, voting_district_towns, get_canvassing_constraint, get_canvassing_constraint, get_canvassing_constraint)
+
         repo.logout()
 
         return doc
@@ -145,5 +194,4 @@ doc = example.provenance()
 print(doc.get_provn())
 print(json.dumps(json.loads(doc.serialize()), indent=4))
 '''
-canvassingBudgetConstraint.execute()
 ## eof

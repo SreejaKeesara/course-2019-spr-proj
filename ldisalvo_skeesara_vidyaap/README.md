@@ -3,7 +3,7 @@ Team Members: Vidya Akavoor, Lauren DiSalvo, Sreeja Keesara
 
 Directory: ldisalvo_skeesara_vidyaap
 
-## Project Justification
+## Project 1 - Justification
 The below datasets can be combined to score the ideologies of voting districts within Massachusetts. The election data will help to identify which political party residents in that district typically vote for. The demographic census data can be used to determine predictors of voting patterns within each county and town. We plan to use the county shapes data to build our visualization of voting districts. We also plan to characterize each ballot question ideologically by comparing districts that voted in favor of the ballot question with those that voted for certain party candidates in the same year.  
 
 ## Datasets
@@ -245,6 +245,48 @@ Maps voting district for state senate and house races to the list of towns in ea
 }
 
 ```
+
+## Project 2 - Narrative
+Problem: How do we create a profile of each local voting district in Massachusetts that allows campaigns or political groups determine which neighborhoods to canvass in and which demographic factors regularly correlate with election outcomes in each district?
+
+To do this, we had to create demographic profiles of each voting district. We did this through several preliminary datasets. We created Voting District Towns which contains a mapping of all the towns within each voting district. The districts are also classified by state senate or house. We also created Demographic Data District House and Demographic Data District Senate datasets. These two scripts used the Voting District Towns dataset and the Demographic Data Town dataset to determine which towns made up a district and to average the numbers for a certain demographic statistic across all the towns to determine the statistic for the entire district. Once we did the above, we were able to proceed with our statistical analysis and constraint satisfaction problems. 
+
+Constraint Satisfaction: We chose to solve a canvassing problem on a voting district level. Each voting district consists of neighborhoods for which we have demographic data. Given a budgeting constraint of X number of people that can be canvassed, we want to solve the problem of which neighborhoods within the district can be visited without going over the total district budget. We decided to use the z3-Solver library to solve this constraint problem for each district. Each neighborhood within a district is a z3 variable that can either be assigned a 0 (do not canvass) or a 1 (do canvass). The constraints use the population of each neighborhood to weight which ones to visit.
+
+Statistical Analysis: [FILL IN]
+
+## Datasets
+### Canvassing Budget Constraint
+Determines which towns within a voting district can be canvassed within a specified canvassing budget (in number of people).
+```
+{
+    "District" : "2nd Middlesex and Norfolk",
+    "Type" : "Senate",
+    "Budget (# of people)" : 100000,
+    "Check" : "sat",
+    "Excluded Towns" : [ ],
+    "Model" : [
+                [ "Ashland", 1 ],
+                [ "Framingham", 1 ],
+                [ "Franklin", 0 ],
+                [ "Holliston", 0 ],
+                [ "Hopkinton", 0 ],
+                [ "Medway", 0 ],
+                [ "Natick", 0 ],
+                [ "popNatick", 36246 ],
+                [ "popMedway", 13329 ],
+                [ "popHopkinton", 18035 ],
+                [ "popHolliston", 14753 ],
+                [ "popFranklin", 32996 ],
+                [ "popFramingham", 72032 ],
+                [ "popAshland", 17706 ]
+            ]
+}
+```
+
+### Voting District Election Outcome Factors
+[todo]
+
 
 ## Additional Python Libraries
 You may need to import the following libraries to access our datasets: bs4, pandas, requests, csv, io
