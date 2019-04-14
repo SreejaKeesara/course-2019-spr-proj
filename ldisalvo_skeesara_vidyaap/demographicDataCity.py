@@ -16,8 +16,8 @@ import pandas as pd
 import prov.model
 import urllib.request
 
-from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, COUNTY_URL, MA_CITY_LIST,  \
-    DEMOGRAPHIC_DATA_TOWN_NAME, TOWN_URL
+from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, COUNTY_URL, MA_CITY_LIST, DEMOGRAPHIC_DATA_TOWN_NAME,\
+    TOWN_URL
 
 
 class demographicDataCity(dml.Algorithm):
@@ -26,16 +26,15 @@ class demographicDataCity(dml.Algorithm):
     writes = [DEMOGRAPHIC_DATA_TOWN_NAME]
 
     @staticmethod
-    # TODO: Fix comment
     def execute(trial=False):
         """
-            Retrieve demographic data by town from census.gov and insert into collection
+            Retrieve demographic data by city from census.gov and insert into collection (collection already contains
+            town information)
             ex)
-             { "Winchester town, Middlesex County, Massachusetts":
-                "Population estimates, July 1, 2017,  (V2017)": "23,339",
-                "Population estimates base, April 1, 2010,  (V2017)": "23,797",
-                "Population, percent change - April 1, 2010 (estimates base) to July 1, 2017,  (V2017)": "-1.9%",
-                "Population, Census, April 1, 2010": "23,793",
+             { "Town" : "Fitchburg city, Massachusetts",
+               "Population estimates, July 1, 2017,  (V2017)" : 40793,
+               "Population estimates base, April 1, 2010,  (V2017)" : 40318,
+               "Median selected monthly owner costs -without a mortgage, 2013-2017" : 652,
                 ..........................
             }
         """
@@ -101,7 +100,6 @@ class demographicDataCity(dml.Algorithm):
 
 
     @staticmethod
-    # TODO: Fix prov
     def provenance(doc=prov.model.ProvDocument(), startTime=None, endTime=None):
         '''
             Create the provenance document describing everything happening
@@ -120,32 +118,32 @@ class demographicDataCity(dml.Algorithm):
         doc.add_namespace('ont',
                           'http://datamechanics.io/ontology#')  # 'Extension', 'DataResource', 'DataSet', 'Retrieval', 'Query', or 'Computation'.
         doc.add_namespace('log', 'http://datamechanics.io/log/')  # The event log.
-        doc.add_namespace('census', 'https://www.census.gov/quickfacts/fact/csv/')
 
         this_script = doc.agent('alg:' + TEAM_NAME + '#demographicDataCity',
                                 {prov.model.PROV_TYPE: prov.model.PROV['SoftwareAgent'],
                                  'ont:Extension': 'py'})
-        resource = doc.entity('census:table/ma', {'prov:label': 'Census Data by City, Massachusetts',
-                                                   prov.model.PROV_TYPE: 'ont:DataResource',
-                                                   'ont:Extension': 'csv'})
+
+        demographicDataTownEntity = doc.entity('dat:' + TEAM_NAME + '#demographicDataTown',
+                                                 {prov.model.PROV_LABEL: 'Census Data by Town',
+                                                  prov.model.PROV_TYPE: 'ont:DataSet'})
+
+
         get_demographicDataCity = doc.activity('log:uuid' + str(uuid.uuid4()), startTime, endTime)
         doc.wasAssociatedWith(get_demographicDataCity, this_script)
-        doc.usage(get_demographicDataCity, resource, startTime,
-
-                  {prov.model.PROV_TYPE: 'ont:Retrieval', # TODO: Fix this
-                   'ont:Query': 'adamstownberkshirecountymassachusetts,greatbarringtontownberkshirecountymassachusetts,'
-                                'leetownberkshirecountymassachusetts,daltontownberkshirecountymassachusetts,'
-                                'williamstowntownberkshirecountymassachusetts,abingtontownplymouthcountymassachusetts/PST045218'
+        doc.usage(get_demographicDataCity, demographicDataTownEntity, startTime, None,
+                  {prov.model.PROV_TYPE: 'ont:Retrieval',
+                   'ont:Query': 'westfieldcitymassachusetts,pittsfieldcitymassachusetts,agawamtowncitymassachusetts,'
+                                'amesburytowncitymassachusetts,attleborocitymassachusetts,'
+                                'barnstabletowncitymassachusetts/PST045218'
                    }
                   )
 
-        demographicDataCityEntity = doc.entity('dat:' + TEAM_NAME + '#demographicDataCity',
-                                                 {prov.model.PROV_LABEL: 'Census Data by City, Massachusetts',
-                                                  prov.model.PROV_TYPE: 'ont:DataSet'})
+        demographicDataCityEntity = doc.entity('dat:' + TEAM_NAME + '#demographicDataCity', {
+            prov.model.PROV_LABEL: 'Demographic Data City - includes city and town',
+            prov.model.PROV_TYPE: 'ont:DataSet'})
         doc.wasAttributedTo(demographicDataCityEntity, this_script)
         doc.wasGeneratedBy(demographicDataCityEntity, get_demographicDataCity, endTime)
-        doc.wasDerivedFrom(demographicDataCityEntity, resource, get_demographicDataCity, get_demographicDataCity,
-                           get_demographicDataCity)
+        doc.wasDerivedFrom(demographicDataTownEntity, get_demographicDataCity, get_demographicDataCity, get_demographicDataCity)
 
         repo.logout()
 
@@ -159,7 +157,6 @@ doc = example.provenance()
 print(doc.get_provn())
 print(json.dumps(json.loads(doc.serialize()), indent=4))
 '''
-
 ## eof
 
 
