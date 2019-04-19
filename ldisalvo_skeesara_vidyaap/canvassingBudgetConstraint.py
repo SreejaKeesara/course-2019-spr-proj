@@ -86,8 +86,8 @@ class canvassingBudgetConstraint(dml.Algorithm):
             # Iterate through each town to get population (2017 estimates) if available
             for town in towns:
                 townDemo = list(repo[DEMOGRAPHIC_DATA_TOWN_NAME].find({"Town": re.compile("^" + town + "")}))
-                if townDemo and not math.isnan(townDemo[0]["Population estimates, July 1, 2017,  (V2017)"]):
-                    popList.append(townDemo[0]["Population estimates, July 1, 2017,  (V2017)"])
+                if townDemo and not math.isnan(townDemo[0]["Population, Census, April 1, 2010"]):
+                    popList.append(townDemo[0]["Population, Census, April 1, 2010"])
                     availableTowns.append(town)
                 else:
                     excludedTowns.append(town)
