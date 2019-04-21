@@ -79,8 +79,8 @@ class demographicDataDistrictSenate(dml.Algorithm):
                 [{"$match": {"Town" : re.compile(townList)}},
                  {"$group":{
                     "_id": bson.objectid.ObjectId(),
-                    "Population estimates, July 1, 2017,  (V2017)": {"$avg" : "$Population estimates, July 1, 2017,  (V2017)"},
-                    "Population estimates base, April 1, 2010,  (V2017)": {"$avg" : "$Population estimates base, April 1, 2010,  (V2017)"},
+                    "Population estimates, July 1, 2018,  (V2018)": {"$avg" : "$Population estimates, July 1, 2018,  (V2018)"},
+                    "Population estimates base, April 1, 2010,  (V2018)": {"$avg" : "$Population estimates base, April 1, 2010,  (V2018)"},
                     "Population, Census, April 1, 2010": {"$avg" : "$Population, Census, April 1, 2010"},
                     "Persons under 5 years, percent": {"$avg": "$Persons under 5 years, percent"},
                     "Persons under 18 years, percent": {"$avg": "$Persons under 18 years, percent"},
