@@ -70,7 +70,9 @@ class demographicDataCity(dml.Algorithm):
             df.columns = cols
 
         joined_df = pd.concat(all_dfs)
-        df = joined_df.dropna(axis=1, how='all')
+        s = set(["Population estimates, July 1, 2018,  (V2018)", "Population estimates base, April 1, 2010,  (V2018)"])
+        sub = [x for x in joined_df.columns if x not in s]
+        df = joined_df.dropna(how='all', subset=sub)
         df = df.reset_index()
         df = df.rename(columns={'index': 'Town'})
 
