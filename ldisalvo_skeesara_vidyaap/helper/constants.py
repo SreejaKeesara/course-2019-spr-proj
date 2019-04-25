@@ -51,8 +51,12 @@ WEIGHTED_SENATE_IDEOLOGIES_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name
 WEIGHTED_HOUSE_IDEOLOGIES = "weightedHouseIdeologies"
 WEIGHTED_HOUSE_IDEOLOGIES_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=WEIGHTED_HOUSE_IDEOLOGIES)
 
-HISTORICAL_RATIOS = "historicalRatios"
-HISTORICAL_RATIOS_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=HISTORICAL_RATIOS)
+HISTORICAL_RATIOS_HOUSE = "historicalRatiosHouse"
+HISTORICAL_RATIOS_HOUSE_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=HISTORICAL_RATIOS_HOUSE)
+
+HISTORICAL_RATIOS_SENATE = "historicalRatiosSenate"
+HISTORICAL_RATIOS_SENATE_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=HISTORICAL_RATIOS_SENATE)
+
 
 DEMOGRAPHIC_DATA_TOWN = "demographicDataTown"
 DEMOGRAPHIC_DATA_TOWN_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DEMOGRAPHIC_DATA_TOWN)
