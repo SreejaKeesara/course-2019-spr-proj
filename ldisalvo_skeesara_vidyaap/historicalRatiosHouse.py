@@ -14,13 +14,13 @@ import uuid
 import dml
 import prov.model
 
-from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, STATE_HOUSE_ELECTIONS_NAME, STATE_HOUSE_ELECTIONS_RESULTS_NAME, HISTORICAL_RATIOS_NAME, HISTORICAL_RATIOS
+from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, STATE_HOUSE_ELECTIONS_NAME, STATE_HOUSE_ELECTIONS_RESULTS_NAME, HISTORICAL_RATIOS_HOUSE_NAME, HISTORICAL_RATIOS_HOUSE
 
 
-class historicalRatios(dml.Algorithm):
+class historicalRatiosHouse(dml.Algorithm):
     contributor = TEAM_NAME
     reads = [STATE_HOUSE_ELECTIONS_NAME, STATE_HOUSE_ELECTIONS_RESULTS_NAME]
-    writes = [HISTORICAL_RATIOS_NAME]
+    writes = [HISTORICAL_RATIOS_HOUSE_NAME]
 
     @staticmethod
     def execute(trial=False):
@@ -106,11 +106,11 @@ class historicalRatios(dml.Algorithm):
             new_list += [new_json]
 
 
-        repo.dropCollection(HISTORICAL_RATIOS)
-        repo.createCollection(HISTORICAL_RATIOS_NAME)
-        repo[HISTORICAL_RATIOS_NAME].insert_many(new_list)
-        repo[HISTORICAL_RATIOS_NAME].metadata({'complete': True})
-        print(repo[HISTORICAL_RATIOS_NAME].metadata())
+        repo.dropCollection(HISTORICAL_RATIOS_HOUSE)
+        repo.createCollection(HISTORICAL_RATIOS_HOUSE_NAME)
+        repo[HISTORICAL_RATIOS_HOUSE_NAME].insert_many(new_list)
+        repo[HISTORICAL_RATIOS_HOUSE_NAME].metadata({'complete': True})
+        print(repo[HISTORICAL_RATIOS_HOUSE_NAME].metadata())
 
 
         repo.logout()
@@ -139,7 +139,7 @@ class historicalRatios(dml.Algorithm):
                           'http://datamechanics.io/ontology#')  # 'Extension', 'DataResource', 'DataSet', 'Retrieval', 'Query', or 'Computation'.
         doc.add_namespace('log', 'http://datamechanics.io/log/')  # The event log.
 
-        this_script = doc.agent('alg:ldisalvo_skeesara_vidyaap#historicalRatios',
+        this_script = doc.agent('alg:ldisalvo_skeesara_vidyaap#historicalRatiosHouse',
                                 {prov.model.PROV_TYPE: prov.model.PROV['SoftwareAgent'], 'ont:Extension': 'py'})
         stateHouseElectionsEntity = doc.entity('dat:' + TEAM_NAME + '#stateHouseElections',
                                                {prov.model.PROV_LABEL: 'MA General State House Elections 2000-2018',
@@ -148,26 +148,26 @@ class historicalRatios(dml.Algorithm):
             prov.model.PROV_LABEL: 'MA General State House Elections Results 2000-2018',
             prov.model.PROV_TYPE: 'ont:DataSet'})
 
-        get_historical_ratios = doc.activity('log:uuid' + str(uuid.uuid4()), startTime, endTime)
-        doc.wasAssociatedWith(get_historical_ratios, this_script)
+        get_historical_ratios_house = doc.activity('log:uuid' + str(uuid.uuid4()), startTime, endTime)
+        doc.wasAssociatedWith(get_historical_ratios_house, this_script)
 
-        doc.usage(get_historical_ratios, stateHouseElectionsEntity, startTime, None,
+        doc.usage(get_historical_ratios_house, stateHouseElectionsEntity, startTime, None,
                   {prov.model.PROV_TYPE: 'ont:Computation',
                    'ont:Query': 'Name'
                    }
                   )
-        doc.usage(get_historical_ratios, stateHouseElectionsResultsEntity, startTime, None,
+        doc.usage(get_historical_ratios_house, stateHouseElectionsResultsEntity, startTime, None,
                   {prov.model.PROV_TYPE: 'ont:Computation',
                    'ont:Query': 'Election ID'
                    }
                   )
 
-        historical_ratios = doc.entity('dat:ldisalvo_skeesara_vidyaap#historicalRatios',
+        historical_ratios_house = doc.entity('dat:ldisalvo_skeesara_vidyaap#historicalRatios',
                           {prov.model.PROV_LABEL: 'Ratio of Democratic to Republican per year', prov.model.PROV_TYPE: 'ont:DataSet'})
-        doc.wasAttributedTo(historical_ratios, this_script)
-        doc.wasGeneratedBy(historical_ratios, get_historical_ratios, endTime)
-        doc.wasDerivedFrom(historical_ratios, stateHouseElectionsEntity, get_historical_ratios, get_historical_ratios, get_historical_ratios)
-        doc.wasDerivedFrom(historical_ratios, stateHouseElectionsResultsEntity, get_historical_ratios, get_historical_ratios, get_historical_ratios)
+        doc.wasAttributedTo(historical_ratios_house, this_script)
+        doc.wasGeneratedBy(historical_ratios_house, get_historical_ratios_house, endTime)
+        doc.wasDerivedFrom(historical_ratios_house, stateHouseElectionsEntity, get_historical_ratios_house, get_historical_ratios_house, get_historical_ratios_house)
+        doc.wasDerivedFrom(historical_ratios_house, stateHouseElectionsResultsEntity, get_historical_ratios_house, get_historical_ratios_house, get_historical_ratios_house)
 
         repo.logout()
 
@@ -183,6 +183,3 @@ print(doc.get_provn())
 print(json.dumps(json.loads(doc.serialize()), indent=4))
 '''
 ## eof
-
-t = historicalRatios
-t.execute()
