@@ -440,7 +440,7 @@ Then run all the scripts in our team folder:
 python3.7 execute.py ldisalvo_skeesara_vidyaap
 ```
 
-Then run app.py
+Then run app.py from within our directory.
 ```
 python3.7 app.py
 ```
