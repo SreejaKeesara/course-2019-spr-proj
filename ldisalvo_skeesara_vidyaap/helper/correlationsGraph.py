@@ -20,55 +20,58 @@ for x in senateList:
     districts +=[x["District"]]
 
 
+def create_firms_graph(district):
+    tup = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({
+                                                                    "Senate District": district
+                                                                },
+                                                                {
+                                                                    "All firms, 2012": 1,
+                                                                    "Men-owned firms, 2012": 1,
+                                                                    "Women-owned firms, 2012": 1,
+                                                                    "Minority-owned firms, 2012": 1,
+                                                                    "Nonminority-owned firms, 2012": 1,
+                                                                    "Veteran-owned firms, 2012": 1,
+                                                                    "Nonveteran-owned firms, 2012": 1
+                                                                }))
+    x_vals = []
+    y_vals = []
+    if len(tup) != 0:
+        item = tup[0]
+        all_firms = item["All firms, 2012"]
 
-tup = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({
-                                                                "Senate District": "Berkshire, Hampshire and Franklin"
-                                                            },
-                                                            {
-                                                                "All firms, 2012": 1,
-                                                                "Men-owned firms, 2012": 1,
-                                                                "Women-owned firms, 2012": 1,
-                                                                "Minority-owned firms, 2012": 1,
-                                                                "Nonminority-owned firms, 2012": 1,
-                                                                "Veteran-owned firms, 2012": 1,
-                                                                "Nonveteran-owned firms, 2012": 1
-                                                            }))
-x_vals = []
-y_vals = []
-if len(tup) != 0:
-    item = tup[0]
-    all_firms = item["All firms, 2012"]
+        x_vals = ["Men-owned", "Women-owned", "Minority-owned", "Non-minority-owned", "Veteran-owned", "Non-veteran-owned"]
 
-    x_vals = ["Men-owned", "Women-owned", "Minority-owned", "Non-minority-owned", "Veteran-owned", "Non-veteran-owned"]
-
-    y_vals += [item["Men-owned firms, 2012"]/all_firms]
-    y_vals += [item["Women-owned firms, 2012"]/all_firms]
-    y_vals += [item["Minority-owned firms, 2012"]/all_firms]
-    y_vals += [item["Nonminority-owned firms, 2012"]/all_firms]
-    y_vals += [item["Veteran-owned firms, 2012"]/all_firms]
-    y_vals += [item["Nonveteran-owned firms, 2012"]/all_firms]
+        y_vals += [item["Men-owned firms, 2012"]/all_firms]
+        y_vals += [item["Women-owned firms, 2012"]/all_firms]
+        y_vals += [item["Minority-owned firms, 2012"]/all_firms]
+        y_vals += [item["Nonminority-owned firms, 2012"]/all_firms]
+        y_vals += [item["Veteran-owned firms, 2012"]/all_firms]
+        y_vals += [item["Nonveteran-owned firms, 2012"]/all_firms]
 
 
 
-trace0 = go.Bar(
-    x=x_vals,
-    y=y_vals,
-    marker=dict(
-        color='rgb(15, 130, 43)',
-        line=dict(
-            color='rgb(8,48,107)',
-            width=1.5,
-        )
-    ),
-    opacity=0.6
-)
+    trace0 = go.Bar(
+        x=x_vals,
+        y=y_vals,
+        marker=dict(
+            color='rgb(15, 130, 43)',
+            line=dict(
+                color='rgb(8,48,107)',
+                width=1.5,
+            )
+        ),
+        opacity=0.6
+    )
 
-data = [trace0]
-layout = go.Layout(
-    title='Firms Ownership Breakdown in Berkshire, Hampshire and Franklin',
-)
+    data = [trace0]
+    layout = go.Layout(
+        title='Firms Ownership Breakdown in '+district,
+    )
 
-graph = go.Figure(data=data, layout=layout)
+    graph = go.Figure(data=data, layout=layout)
+    return graph
+
+init_graph = create_firms_graph("Berkshire, Hampshire and Franklin")
 
 app = dash.Dash()
 
@@ -109,7 +112,7 @@ app.layout  = \
 
             dcc.Graph(
                 id='graph',
-                figure=graph,
+                figure=init_graph,
                 style={'padding-left': '10px'}
             ),
         ], className='six columns'),
@@ -125,55 +128,11 @@ app.layout  = \
 def update_output(n_clicks, d_value, g_value):
 
     if d_value[0] != "":
-        new_tup = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({"Senate District": d_value[0]},
-            {
-                "All firms, 2012": 1,
-                "Men-owned firms, 2012": 1,
-                "Women-owned firms, 2012": 1,
-                "Minority-owned firms, 2012": 1,
-                "Nonminority-owned firms, 2012": 1,
-                "Veteran-owned firms, 2012": 1,
-                "Nonveteran-owned firms, 2012": 1
-            }))
-
-
-        new_x_vals = []
-        new_y_vals = []
-
-        if len(new_tup) != 0:
-            new_item = new_tup[0]
-            new_all_firms = new_item["All firms, 2012"]
-
-            new_x_vals = ["Men-owned", "Women-owned", "Minority-owned", "Non-minority-owned", "Veteran-owned",
-                      "Non-veteran-owned"]
-
-            new_y_vals += [new_item["Men-owned firms, 2012"] / new_all_firms]
-            new_y_vals += [new_item["Women-owned firms, 2012"] / new_all_firms]
-            new_y_vals += [new_item["Minority-owned firms, 2012"] / new_all_firms]
-            new_y_vals += [new_item["Nonminority-owned firms, 2012"] / new_all_firms]
-            new_y_vals += [new_item["Veteran-owned firms, 2012"] / new_all_firms]
-            new_y_vals += [new_item["Nonveteran-owned firms, 2012"] / new_all_firms]
-
-    if g_value == "firms":
-        trace = go.Bar(
-            x=new_x_vals,
-            y=new_y_vals,
-            marker=dict(
-                color='rgb(15, 130, 43)',
-                line=dict(
-                    color='rgb(8,48,107)',
-                    width=1.5,
-                )
-            ),
-            opacity=0.6
-        )
-
-        new_data = [trace]
-        new_layout = go.Layout(
-            title='Firms Ownership Breakdown in {}'.format(d_value[0]),
-        )
-
-        return dict(data=new_data, layout=new_layout)
+        if g_value == "firms":
+            new_graph = create_firms_graph(d_value[0])
+            return new_graph
+        return init_graph
+    return init_graph
 
 
 if __name__ == '__main__':
