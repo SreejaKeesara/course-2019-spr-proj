@@ -411,7 +411,7 @@ A limitation of calculating correlation coefficients is that the demographic met
 
 A larger-scale problem that we faced was that our application is sensitive to changes in our online data sources. If updates are made online and our schema no longer matches the data source, we may have to update our schema as well.
 
-## Conclusion
+## Summary and Results
 Our data research consisted of the following steps: retrieval of data sets from online sources, transformation and manipulation of datasets, and analysis using statistical methods and constraint solvers. By doing this, we were successfully able to characterize the political ideology and demographic breakdown of voting districts in Massachusetts. 
 
 We created a final visualization of the political ideologies of each voting district by shading a map of Massachusetts based on the ideology score we gave each district.  If a district is more strongly associated with voting for a specific party, it is shaded more darkly with that party’s color - blue for Democratic and red for Republican.  Our visualization is also a tool for others to come up with new conclusions by either adding new information or analyzing the existing information.  For example, we allow users to alter the parameters to our canvass budgeting problem and see the effects of their changes.  Users can input how many people they are willing to canvass and see if it makes canvassing more or less feasible in a given district.
