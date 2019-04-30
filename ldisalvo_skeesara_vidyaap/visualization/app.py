@@ -9,12 +9,16 @@ April 28, 2019
 """
 
 import sd_material_ui
+import plotly.graph_objs as go
 
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 
+from ldisalvo_skeesara_vidyaap.visualization.charts.senateCorr import fig as senateCorrChart
+from ldisalvo_skeesara_vidyaap.visualization.charts.houseCorr import fig as houseCorrChart
+from ldisalvo_skeesara_vidyaap.visualization.charts.race import getValues, race
 from ldisalvo_skeesara_vidyaap.helper.dataRetrieval import dataRetrieval
 from ldisalvo_skeesara_vidyaap.helper.constants import BINS,COLORSCALE, MAPBOX_ACCESS_TOKEN,\
     URL_YEAR_TEMPLATE, URL_AVG_TEMPLATE, SENATE_KEY, HOUSE_KEY
@@ -93,39 +97,51 @@ app.layout  = \
         ], className='six columns'),
 
         html.Div([
-            html.P('Select a voting district to view more information about demographics and recent elections.', style=dict(marginTop='8rem', paddingLeft='10px')),
-            html.Div(
-                dcc.Dropdown(
-                    options=[
-                        {'label': 'District Demographics', 'value': 'demo'},
-                        {'label': 'Election Outcome Correlations', 'value': 'correlations'},
-                        {'label': 'Canvassing Budget Plan', 'value': 'canvass-budget-constraint'}
-                    ],
-                    multi=False,
-                    value="basic-demo",
-                    style=dict(width=275, display='inline-block'),
-                    placeholder='Select a chart type.'
-                ),
-            style=dict(padding='10px', display='inline-block')),
+            html.P('Select a chart type and voting district to view more information.', style=dict(marginTop='8rem', paddingLeft='10px')),
+            html.Div([
+                html.Div(
+                    dcc.Dropdown(
+                        id='Graph-type',
+                        options=[
+                            {'label': 'District Demographics', 'value': 'demo'},
+                            {'label': 'Election Outcome Correlations', 'value': 'correlations'},
+                            {'label': 'Canvassing Budget Plan', 'value': 'canvass-budget-constraint'},
+                            {'label': 'Racial Breakdown', 'value': 'race'}
+                        ],
+                        multi=False,
+                        value="correlations",
+                        style=dict(width=250, display='inline-block'),
+                        placeholder='Select a chart type.'
+                    ),
+                style=dict(padding='10px', display='inline-block', verticalAlign='middle')),
 
-            html.Div(
-                dcc.Dropdown(
-                    id='district-dropdown',
-                    options=[],
-                    multi=False,
-                    value="",
-                    style=dict(width=275, display='inline-block'),
-                    placeholder='Select a district to learn more...'
-                ),
-            style=dict(padding='10px', display='inline-block')),
+                html.Div(
+                    dcc.Dropdown(
+                        id='District',
+                        options=[],
+                        multi=False,
+                        value="",
+                        style=dict(width=250, display='inline-block'),
+                        placeholder='Select a district to learn more...'
+                    ),
+                style=dict(padding='10px', display='inline-block', verticalAlign='middle')),
+
+                html.Div(
+                    sd_material_ui.RaisedButton(
+                        label='Submit',
+                        id='button',
+                        buttonStyle = dict(display='inline-block', height='34px'),
+                    ),
+                style=dict(padding='10px', display='inline-block')),
+            ]),
+            html.Div(id='chart-content'),
         ], className='six columns'),
     ])
 
 @app.callback(
     [Output('senateButton', 'buttonStyle'),
      Output('houseButton', 'buttonStyle'),
-     Output('district-dropdown', 'options'),
-     Output('district-dropdown', 'value')],
+     Output('District', 'options')],
     [Input('houseButton', 'n_clicks'),
      Input('senateButton', 'n_clicks')],
     [State('houseButton', 'n_clicks_previous'),
@@ -134,13 +150,13 @@ def update_buttons(n_clicks_house, n_clicks_senate, n_clicks_prev_house, n_click
     if n_clicks_senate:
         if (n_clicks_senate == 1 and n_clicks_prev_senate == None) or (n_clicks_senate > n_clicks_prev_senate):
             options = [dict(label=district, value=district) for district in SENATE_MAP_POINTS['name'].tolist()]
-            return dict(width=275, backgroundColor='lightgrey'), dict(width=275), options, 'all'
+            return dict(width=275, backgroundColor='lightgrey'), dict(width=275), options
         else:
             options = [dict(label=district, value=district) for district in HOUSE_MAP_POINTS['name'].tolist()]
-            return dict(width=275), dict(width=275, backgroundColor='lightgrey'), options, 'all'
+            return dict(width=275), dict(width=275, backgroundColor='lightgrey'), options
     else:
         options = [dict(label=district, value=district) for district in HOUSE_MAP_POINTS['name'].tolist()]
-        return dict(width=275), dict(width=275, backgroundColor='lightgrey'), options, 'all'
+        return dict(width=275), dict(width=275, backgroundColor='lightgrey'), options
 
 @app.callback(
     [Output('year-slider', 'disabled'),
@@ -153,14 +169,21 @@ def update_slider(wantsAverage):
         return False, "Political Party Alignment by Voting District and Year from Republican (-1) to Democrat (1)"
 
 @app.callback(
+    Output('District', 'disabled'),
+    [Input('Graph-type', 'value')])
+def disable_district(g_value):
+    if g_value == "correlations":
+        return True
+    return False
+
+@app.callback(
     Output('district-level-choropleth', 'figure'),
     [Input('houseButton', 'buttonStyle'),
      Input('senateButton', 'buttonStyle'),
      Input('historical', 'toggled'),
-     Input('year-slider', 'value'),
-     Input('district-dropdown', 'value')],
+     Input('year-slider', 'value')],
     [State('district-level-choropleth', 'figure')])
-def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, districtSelected, figure):
+def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
     annotations = [dict(
         showarrow=False,
         align='right',
@@ -276,6 +299,38 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, district
 
     fig = dict(data=data, layout=layout)
     return fig
+
+@app.callback(
+    Output('chart-content', 'children'),
+    [Input('houseButton', 'buttonStyle'),
+     Input('senateButton', 'buttonStyle'),
+     Input('button', 'n_clicks')],
+    [State('District', 'value'),
+     State('Graph-type', 'value')])
+def return_chart(btn_house_style, btn_senate_style, n_clicks, district, graphType):
+    if graphType == 'correlations':
+        if btn_senate_style == dict(width=275, backgroundColor='lightgrey'):
+            correlation_chart = senateCorrChart
+        else:
+            correlation_chart = houseCorrChart
+        return dcc.Graph(id='Correlation', figure=correlation_chart)
+
+    elif graphType == 'race':
+        if btn_senate_style == dict(width=275, backgroundColor='lightgrey'):
+            vals = getValues(district, SENATE_KEY)
+        else:
+            vals = getValues(district, HOUSE_KEY)
+
+        race_chart = go.Figure(
+            data=[go.Pie(labels=race,
+                         values=vals)],
+            layout=go.Layout(
+                legend=dict(x=-.2, y=-.2, bgcolor='rgba(0,0,0,0)'),
+                autosize=True,
+                title='Racial Breakdown')
+        )
+
+        return dcc.Graph(id='Race', figure=race_chart)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

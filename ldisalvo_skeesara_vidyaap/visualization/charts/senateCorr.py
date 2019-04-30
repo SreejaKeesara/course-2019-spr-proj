@@ -1,17 +1,11 @@
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
 import plotly.graph_objs as go
-from dash.dependencies import Input, Output, State
 import pymongo
 from plotly import tools
 
 import math
 
 
-from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, VOTING_DISTRICT_TOWNS_NAME, \
-    DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME, DEMOGRAPHIC_SENATE_CORRELATIONS_NAME, DEMOGRAPHIC_HOUSE_CORRELATIONS_NAME
-from dash.dependencies import Input, Output
+from ldisalvo_skeesara_vidyaap.helper.constants import TEAM_NAME, VOTING_DISTRICT_TOWNS_NAME, DEMOGRAPHIC_SENATE_CORRELATIONS_NAME
 
 # Set up the database connection.
 client = pymongo.MongoClient()
@@ -82,64 +76,3 @@ fig['layout']['xaxis2'].update(automargin=True, tickfont=dict(
             color='black'
         ), ticks='outside', tickangle=-45)
 
-### above is setup code for corr figure ###
-
-app = dash.Dash()
-
-mapbox_access_token = "pk.eyJ1Ijoic2tlZXNhcmEiLCJhIjoiY2p1bXB5bGF6MHNsZTQzczh4djh1eDI3aCJ9.vTi1hnCqCO7txE_veUAaEg"
-
-app.css.append_css({'external_url': 'https://codepen.io/plotly/pen/EQZeaW.css'})
-
-spacer = html.Div(children=[], style=dict(height=20))
-
-app.layout  = \
-    html.Div([
-        html.Div([
-            dcc.Dropdown(
-                id="District",
-                options=[{
-                    'label': i,
-                    'value': i
-                } for i in districts],
-                value='All Districts',
-                multi=False),
-
-            dcc.Dropdown(
-                id="Graph-type",
-                options=[
-                    {'label': 'Racial Breakdown', 'value': 'race'},
-                    {'label': 'Metrics Most Correlated to Political Ideology', 'value': 'corr'}
-                ],
-                multi=False,
-                value="basic-demo",
-            ),
-            html.Button('Submit',
-                id='button',
-                style = dict(display='inline-block')),
-
-            dcc.Graph(id='Correlation',
-                      figure=fig,
-                      )
-        ], className='six columns'),
-
-    ])
-#
-@app.callback(
-    Output('District', 'disabled'),
-    [Input('Graph-type', 'value')])
-def disable_district(g_value):
-    if g_value == "corr":
-        return True
-    return False
-
-
-@app.callback(
-Output('Correlation', 'figure'),
-[Input('button', 'n_clicks')],
-[State('District', 'value'), State('Graph-type', 'value')])
-def update_output(n_clicks, d_value, g_value):
-    if g_value == "corr":
-        return fig
-
-if __name__ == '__main__':
-    app.run_server(debug=True)
