@@ -99,6 +99,7 @@ fig.add_barpolar(r = [1, 1, 1, 1, 1],
                  showlegend=False,
                  offset=0,
                  width=36,
+                 hoverinfo="none",
                  ids=["-","0", "20", "40", "60", "80", "100"],
                  marker={'color': ["rgb(71, 36, 107)", "rgb(108, 73, 139)", "rgb(145, 110, 171)",  "rgb(182, 147, 203)", "rgb(220, 185, 236)"]})
 
@@ -120,6 +121,7 @@ needle = fig.add_scatterpolar(r=[1, 0, 0, 1],
                               showlegend=False,
                               fill='tonext',
                               mode='lines',
+                              marker=dict(color = 'rgb(0, 0, 0)'),
                               subplot = 'polar2')
 # Configure polar 2 for needle
 fig.layout.polar2 = {}
@@ -179,10 +181,10 @@ app.layout  = \
                         id='button',
                         style = dict(display='inline-block')),
 
-            html.Div(dcc.Input(id='input-box', type='text')),
-            html.Button('Calculate', id='submit'),
             html.Div(id='container-button-basic',
                      children='With a budget of 100000 people, you can visit these towns in Berkshire : {}'.format(string)),
+            html.Div(dcc.Input(id='input-box', type='text')),
+            html.Button('Calculate', id='submit'),
 
             dcc.Graph(
                 id='graph',
@@ -204,7 +206,7 @@ app.layout  = \
 def update_budget(n_clicks, n_submit, d_value, g_value, i_value):
     if g_value == "canvass-budget-constraint":
         if n_clicks and not n_submit:
-            ret = "Enter a budget and press submit to see which towns in {} you can visit".format(d_value[0])
+            ret = 'Enter a budget and press "Calculate" to see which towns in {} you can visit'.format(d_value[0])
         elif n_submit:
             new_votingDistricts = list(repo[VOTING_DISTRICT_TOWNS_NAME].find(
                 {"Type": "Senate", "District": d_value[0]},
@@ -274,9 +276,9 @@ def update_budget(n_clicks, n_submit, d_value, g_value, i_value):
 
 
             if len(new_string) == 0:
-                ret = "You cannot visit any towns in {} with a budget of {} people".format(d_value[0], i_value)
+                ret = "You cannot visit any towns in {} with a budget of {} people.".format(d_value[0], i_value)
             else:
-                ret = "You can visit the following towns with this budget: " + new_string
+                ret = "With a budget of {} people, You can visit the following towns: ".format(i_value) + new_string
 
     else:
         ret = ""
