@@ -252,7 +252,7 @@ Calculates a weighted ideology score for each state senate electoral district by
     "Republican ratio" : .2,
     "Others ratio" : .1,
     "Blanks ratios" : .1,
-    "Average ratio": .4,
+    "Average ratio": .2,
     "Totals" : 1
 }
 
