@@ -4,7 +4,7 @@ Team Members: Vidya Akavoor, Lauren DiSalvo, Sreeja Keesara
 Directory: ldisalvo_skeesara_vidyaap
 
 ## Introduction
-Our research objective was to define and characterize the political ideology in Massachusetts. With the abundance of sources pertaining to election data, it can be difficult to visualize the relationship between the different datasets. Our visualization combines and transforms multiple datasets to provide a holistic political view of voting districts within Massachusetts. 
+Our research objective was to define and characterize the political ideology of voting districts in Massachusetts with a focus on state Senate and House elections. With the abundance of sources pertaining to election data, it can be difficult to identify patterns between different datasets. Our visualization combines and transforms multiple datasets to provide a holistic political view of voting districts within Massachusetts.
 
 ## Datasets
 We gathered Massachusetts election data from a variety of sources and stored them in MongoDB. Below we describe the schema of each dataset that we produced.
@@ -352,7 +352,9 @@ After our initial data transformations, we completed a more in-depth analysis to
 To do this, we created demographic profiles of each voting district.  We created the table, votingDistrictTowns, which gives us all the towns in each district.  The districts are classified as either State Senate or House districts.  Using this table and the demographicDataTown table we created the demographicDataDistrictHouse and demographicDataDistrictSenate tables.  These two tables contain the demographic statistics for each district based on the average across the statistics from each town in a given district. Once we did the above, we were able to proceed with our statistical analysis and constraint satisfaction problems.
 
 ### Constraint Satisfaction
-We chose to solve the canvassing problem on a voting district level. Each voting district consists of neighborhoods for which we have demographic data. Given a budgeting constraint of X number of people that can be canvassed, we want to solve the problem of which neighborhoods within the district can be visited without going over the total district budget. We decided to use the z3-Solver library to solve this constraint problem for each district. Each neighborhood within a district is a z3 variable that can either be assigned a 0 (do not canvass) or a 1 (canvass). The constraints use the population of each neighborhood to weight which ones to visit.
+Given a budgeting constraint of X number of people that can be canvassed, we answered the question of which neighborhoods within the district can be visited without going over the total district budget. Each voting district consists of towns for which we have demographic data, including statistics about population, income, etc. 
+
+We used the z3-Solver library to solve this constraint problem for each district. Each neighborhood within a district is a z3 variable that can either be assigned a 0 (do not canvass) or a 1 (canvass). The constraints use the population of each neighborhood to weight which ones to visit.
 
 #### Canvassing Budget Constraint
 Table Name: canvassingBudgetConstraint
@@ -384,7 +386,7 @@ Determines which towns within a voting district can be canvassed within a specif
 ```
 
 ### Statistical Analysis
-In order to determine any strong predictors of voting ideology by district we created a table of correlation coefficients comparing demographic information and voting ideology.  The coefficients compare each piece of demographic data with how Democratic and how Republican each district is.  A higher correlation coefficient indicates a stronger correlation between a given statistical metric and the likelihood of voting a certain way.
+In order to determine any strong predictors of voting ideology in Massachusetts, we created a table of correlation coefficients comparing demographic information and voting ideology. The coefficients compare each piece of demographic data with how Democratic and how Republican the districts are. A higher correlation coefficient indicates a stronger correlation between a given statistical metric and the likelihood of voting a certain way. 
 
 Note: When trial mode is enabled, running time is cut from 2 minutes and 30 seconds to 28 seconds. 
 
@@ -405,19 +407,20 @@ Table Names: demographicHouseCorrelations, demographicSenateCorrelations
 ```
 
 ### Limitations
-A limitation of using the constraint solver was that we were unable to configure a problem with multiple unknown dimensions. More specifically, we were interested in using the constraint solver to both optimize the funds allotted for canvassing in each district and determine which districts can be visited. (Sreeja make sure this makes sense)
+Constraint Solver: We were unable to construct a problem with multiple constraining factors. Specifically, we were interested in using the constraint solver to both determine which districts can be visited and optimize the funds allotted for canvassing in each district.
 
-A limitation of calculating correlation coefficients is that the demographic metrics are not all quantitative. It is not possible to find correlations between some of the data points given that they were not all numeric values.
 
-A larger-scale problem that we faced was that our application is sensitive to changes in our online data sources. If updates are made online and our schema no longer matches the data source, we may have to update our schema as well.
-
+Data Source Changes: Because data was only available on government websites, our project was subject to issues when the data was updated or when the site itself was down, causing us to update our schema accordingly.
 ## Conclusion
 Our data research consisted of the following steps: retrieval of data sets from online sources, transformation and manipulation of datasets, and analysis using statistical methods and constraint solvers. By doing this, we were successfully able to characterize the political ideology and demographic breakdown of voting districts in Massachusetts. 
 
-We created a final visualization of the political ideologies of each voting district by shading a map of Massachusetts based on the ideology score we gave each district.  If a district is more strongly associated with voting for a specific party, it is shaded more darkly with that party’s color - blue for Democratic and red for Republican.  Our visualization is also a tool for others to come up with new conclusions by either adding new information or analyzing the existing information.  For example, we allow users to alter the parameters to our canvass budgeting problem and see the effects of their changes.  Users can input how many people they are willing to canvass and see if it makes canvassing more or less feasible in a given district.
+We created a final visualization of the political ideologies of each voting district by shading a map of Massachusetts based on the ideology score we gave each district.  If a district is more strongly associated with voting for a specific party, it is shaded more darkly with that party’s color - blue for Democratic and red for Republican.  We created a profile of local political ideologies and demographics of voting districts within Massachusetts and provided an interactive model to explore how the political climate may have changed in recent years. We also created a tool to simulate the budgeting constraints of local campaigns. For example, users can alter the parameters to our canvassing budget problem and see if canvassing is more or less feasible in a given district.
 
-After calculating the correlation coefficients for the demographic metrics, we were able to conclude what metrics had the strongest correlation in reference to a district voting either Democratic or Republican. The following five metrics were the most strongly correlated with voting democratic in Massachusetts: two or more races, foreign born persons, language other than English spoken at home, persons without health insurance, and Asian alone. Furthermore, the following five metrics were the most strongly correlated with voting Republican in Massachusetts: White alone, living in the same house one year ago, White alone (not Hispanic or Latino), owner occupied housing unit rate, and Native Hawaiian and other Pacific Islander alone.
+After calculating the correlation coefficients for the demographic metrics, we were able to conclude what metrics had the strongest correlation in reference to a district voting either Democratic or Republican. 
 
+The following five metrics were the most strongly correlated with voting Democratic in Massachusetts: two or more races, foreign born persons, language other than English spoken at home, persons without health insurance, and Asian alone. 
+
+Furthermore, the following five metrics were the most strongly correlated with voting Republican in Massachusetts: White alone, living in the same house one year ago, White alone (not Hispanic or Latino), owner occupied housing unit rate, and Native Hawaiian and other Pacific Islander alone.
 
 
 ## Visualization
