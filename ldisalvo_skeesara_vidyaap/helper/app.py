@@ -7,48 +7,19 @@ Notes :
 
 April 28, 2019
 """
-import json
-import urllib
+
 import sd_material_ui
-import pandas as pd
 
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 
-from ldisalvo_skeesara_vidyaap.helper.constants import HOUSE_DISTRICT_SHAPE_URL, SENATE_DISTRICT_SHAPE_URL
-
-BINS = [-1, -.8, -.6, -.4, -.2, 0, .2, .4, .6, .8, 1]
-COLORSCALE = ["#e50b00", "#cb0a15", "#b2092a", "#98083f", "#7f0754", "#65066a", "#4c057f", "#320494", "#1903a9", "#0003bf"]
-MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic2tlZXNhcmEiLCJhIjoiY2p1bXB5bGF6MHNsZTQzczh4djh1eDI3aCJ9.vTi1hnCqCO7txE_veUAaEg"
-
-def process_map_data(url):
-    csv_string = urllib.request.urlopen(url).read().decode("utf-8")
-    response = json.loads(csv_string)['features']
-    for district in response:
-        lon, lat = calculate_center(district['geometry']['type'], district['geometry']['coordinates'][0])
-
-        district['lat'] = lat
-        district['lon'] = lon
-        district['hover'] = district['properties']['NAME']
-        district.pop('type')
-        district.pop('geometry')
-        district.pop('properties')
-
-    df = pd.DataFrame.from_records(response)
-    return df
-
-def calculate_center(type, coordinates):
-    if type == 'MultiPolygon':
-        coordinates = coordinates[0]
-
-    x = [float(p[0]) for p in coordinates]
-    y = [float(p[1]) for p in coordinates]
-    return sum(x) / len(coordinates), sum(y) / len(coordinates)
-
-HOUSE_MAP_POINTS = process_map_data(HOUSE_DISTRICT_SHAPE_URL)
-SENATE_MAP_POINTS = process_map_data(SENATE_DISTRICT_SHAPE_URL)
+from ldisalvo_skeesara_vidyaap.helper.dataRetrieval import dataRetrieval
+from ldisalvo_skeesara_vidyaap.helper.constants import BINS,COLORSCALE, MAPBOX_ACCESS_TOKEN,\
+    URL_YEAR_TEMPLATE, URL_AVG_TEMPLATE, SENATE_KEY, HOUSE_KEY
+from ldisalvo_skeesara_vidyaap.helper.dataRetrieval import SENATE_BY_YEAR, HOUSE_BY_YEAR, \
+    SENATE_AVERAGE, HOUSE_AVERAGE, SENATE_MAP_POINTS, HOUSE_MAP_POINTS
 
 app = dash.Dash(__name__)
 
@@ -78,7 +49,7 @@ app.layout  = \
                 ], style={'display': 'inline-block', 'padding': '10px'}),
 
                 sd_material_ui.Toggle(id='historical',
-                                      label="Average ideology by district from 2012 to 2018",
+                                      label="Average ideology by district from 2010 to 2018",
                                       labelPosition='right', style=dict(padding='10px'),
                                       labelStyle={'font-size': 18}),
 
@@ -90,8 +61,7 @@ app.layout  = \
             ]),
 
             html.Div([
-                html.P('Map of Voting District Party Alignment from Republican (-1) to Democrat (1)',
-                       id = 'choropleth-title',
+                html.P(id = 'choropleth-title',
                        style = {'fontWeight':600}),
                 dcc.Loading(id='loading-1', children=[dcc.Graph(
                     id='district-level-choropleth',
@@ -123,18 +93,7 @@ app.layout  = \
         ], className='six columns'),
 
         html.Div([
-            html.P('Select a voting district to view more information about demographics and recent elections.', style=dict(marginTop='8rem')),
-            html.Div(
-                dcc.Dropdown(
-                    id='district-dropdown',
-                    options=[],
-                    multi=False,
-                    value="",
-                    style=dict(width=275, display='inline-block'),
-                    placeholder='Select a district to learn more...'
-                ),
-            style=dict(padding='10px', display='inline-block')),
-
+            html.P('Select a voting district to view more information about demographics and recent elections.', style=dict(marginTop='8rem', paddingLeft='10px')),
             html.Div(
                 dcc.Dropdown(
                     options=[
@@ -148,13 +107,25 @@ app.layout  = \
                     placeholder='Select a chart type.'
                 ),
             style=dict(padding='10px', display='inline-block')),
+
+            html.Div(
+                dcc.Dropdown(
+                    id='district-dropdown',
+                    options=[],
+                    multi=False,
+                    value="",
+                    style=dict(width=275, display='inline-block'),
+                    placeholder='Select a district to learn more...'
+                ),
+            style=dict(padding='10px', display='inline-block')),
         ], className='six columns'),
     ])
 
 @app.callback(
     [Output('senateButton', 'buttonStyle'),
      Output('houseButton', 'buttonStyle'),
-     Output('district-dropdown', 'options')],
+     Output('district-dropdown', 'options'),
+     Output('district-dropdown', 'value')],
     [Input('houseButton', 'n_clicks'),
      Input('senateButton', 'n_clicks')],
     [State('houseButton', 'n_clicks_previous'),
@@ -162,14 +133,14 @@ app.layout  = \
 def update_buttons(n_clicks_house, n_clicks_senate, n_clicks_prev_house, n_clicks_prev_senate):
     if n_clicks_senate:
         if (n_clicks_senate == 1 and n_clicks_prev_senate == None) or (n_clicks_senate > n_clicks_prev_senate):
-            options = [dict(label=district, value=district) for district in SENATE_MAP_POINTS['hover'].tolist()]
-            return dict(width=275, backgroundColor='lightgrey'), dict(width=275), options
+            options = [dict(label=district, value=district) for district in SENATE_MAP_POINTS['name'].tolist()]
+            return dict(width=275, backgroundColor='lightgrey'), dict(width=275), options, 'all'
         else:
-            options = [dict(label=district, value=district) for district in HOUSE_MAP_POINTS['hover'].tolist()]
-            return dict(width=275), dict(width=275, backgroundColor='lightgrey'), options
+            options = [dict(label=district, value=district) for district in HOUSE_MAP_POINTS['name'].tolist()]
+            return dict(width=275), dict(width=275, backgroundColor='lightgrey'), options, 'all'
     else:
-        options = [dict(label=district, value=district) for district in HOUSE_MAP_POINTS['hover'].tolist()]
-        return dict(width=275), dict(width=275, backgroundColor='lightgrey'), options
+        options = [dict(label=district, value=district) for district in HOUSE_MAP_POINTS['name'].tolist()]
+        return dict(width=275), dict(width=275, backgroundColor='lightgrey'), options, 'all'
 
 @app.callback(
     [Output('year-slider', 'disabled'),
@@ -177,18 +148,19 @@ def update_buttons(n_clicks_house, n_clicks_senate, n_clicks_prev_house, n_click
     [Input('historical', 'toggled')])
 def update_slider(wantsAverage):
     if wantsAverage:
-        return True, "Map of Average Political Party Alignment by Voting District from Republican (-1) to Democrat (1)"
+        return True, "Average Political Party Alignment by Voting District from Republican (-1) to Democrat (1)"
     else:
-        return False, "Map of Political Party Alignment by Voting District and Year from Republican (-1) to Democrat (1)"
+        return False, "Political Party Alignment by Voting District and Year from Republican (-1) to Democrat (1)"
 
 @app.callback(
     Output('district-level-choropleth', 'figure'),
     [Input('houseButton', 'buttonStyle'),
      Input('senateButton', 'buttonStyle'),
      Input('historical', 'toggled'),
-     Input('year-slider', 'value')],
+     Input('year-slider', 'value'),
+     Input('district-dropdown', 'value')],
     [State('district-level-choropleth', 'figure')])
-def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
+def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, districtSelected, figure):
     annotations = [dict(
         showarrow=False,
         align='right',
@@ -198,8 +170,8 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
     )]
 
     for i in range(1, len(BINS)):
-        color = COLORSCALE[i-1]
-        text = str(BINS[i-1]) + " to " + str(BINS[i])
+        color = COLORSCALE[i - 1]
+        text = str(BINS[i - 1]) + " to " + str(BINS[i])
         annotations.append(
             dict(
                 arrowcolor=color,
@@ -222,7 +194,7 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
                 mapbox=dict(
                     layers=[],
                     accesstoken=MAPBOX_ACCESS_TOKEN,
-                    # bearing=0,
+                    bearing=0,
                     center=dict(
                         lat=42.4,
                         lon=-71.38
@@ -233,18 +205,12 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
                 ),
             )
 
-    URL_YEAR_TEMPLATE = "http://datamechanics.io/data/ldisalvo_skeesara_vidyaap/{type}-{year}-{upper}-{lower}-shape-date.json"
-    URL_AVG_TEMPLATE = "http://datamechanics.io/data/ldisalvo_skeesara_vidyaap/{type}-average-{upper}-{lower}-shape-data.json"
-
     if btn_senate_style == dict(width=275, backgroundColor='lightgrey'):
         for x in range(1, len(BINS)):
             lower = BINS[x - 1]
             upper = BINS[x]
 
-            if wantsAverage:
-                source = URL_AVG_TEMPLATE.format(type="Senate", upper=upper, lower=lower)
-            else:
-                source = URL_YEAR_TEMPLATE.format(type="Senate", year=year, upper=upper, lower=lower)
+            source = URL_AVG_TEMPLATE.format(type=SENATE_KEY, upper=upper, lower=lower) if wantsAverage else URL_YEAR_TEMPLATE.format(type=SENATE_KEY, year=year, upper=upper, lower=lower)
 
             layer = dict(
                 sourcetype = 'geojson',
@@ -255,24 +221,31 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
 
             layout['mapbox']['layers'].append(layer)
 
+
+        districtList = SENATE_MAP_POINTS['name']
+        ratiosList = dataRetrieval.get_ratios_list(SENATE_AVERAGE, True, districtList, year) if wantsAverage else dataRetrieval.get_ratios_list(SENATE_BY_YEAR, False, districtList, year)
+        hoverList = []
+
+        for x in range(len(districtList)):
+            hoverList.append('{district}<br>Population: {pop}<br>Score: {score}'.format(
+                district=districtList[x], pop=SENATE_MAP_POINTS['population'][x],
+                score=ratiosList[x]))
+
         data = [dict(
             lat=SENATE_MAP_POINTS['lat'],
             lon=SENATE_MAP_POINTS['lon'],
-            text=SENATE_MAP_POINTS['hover'],
+            text=hoverList,
             type='scattermapbox',
             hoverinfo='text',
             marker=dict(size=5, color='white', opacity=0)
         )]
+
     else:
         for x in range(1, len(BINS)):
             lower = BINS[x - 1]
             upper = BINS[x]
 
-            if wantsAverage:
-                source = URL_AVG_TEMPLATE.format(type="House", upper=upper, lower=lower)
-            else:
-                source = URL_YEAR_TEMPLATE.format(type="House", year=year, upper=upper, lower=lower)
-
+            source = URL_AVG_TEMPLATE.format(type=HOUSE_KEY, upper=upper, lower=lower) if wantsAverage else URL_YEAR_TEMPLATE.format(type=HOUSE_KEY, year=year, upper=upper, lower=lower)
 
             layer = dict(
                 sourcetype='geojson',
@@ -283,10 +256,19 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
 
             layout['mapbox']['layers'].append(layer)
 
+        districtList = HOUSE_MAP_POINTS['name']
+        ratiosList = dataRetrieval.get_ratios_list(HOUSE_AVERAGE, True, districtList, year) if wantsAverage else dataRetrieval.get_ratios_list(HOUSE_BY_YEAR, False, districtList, year)
+        hoverList = []
+
+        for x in range(len(districtList)):
+            hoverList.append('{district}<br>Population: {pop}<br>Score: {score}'.format(
+                district=districtList[x], pop=HOUSE_MAP_POINTS['population'][x],
+                score=ratiosList[x].tolist()[0]))
+
         data = [dict(
             lat=HOUSE_MAP_POINTS['lat'],
             lon=HOUSE_MAP_POINTS['lon'],
-            text=HOUSE_MAP_POINTS['hover'],
+            text=hoverList,
             type='scattermapbox',
             hoverinfo='text',
             marker=dict(size=5, color='white', opacity=0)
@@ -294,8 +276,6 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
 
     fig = dict(data=data, layout=layout)
     return fig
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

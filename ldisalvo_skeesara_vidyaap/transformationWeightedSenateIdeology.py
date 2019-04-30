@@ -34,6 +34,7 @@ class transformationWeightedSenateIdeology(dml.Algorithm):
                     "Others ratio" : .1,
                     "Blanks ratios" : .1,
                     "Totals" : 1
+                    "Average ratio": .2
                 }
         """
         startTime = datetime.datetime.now()
@@ -117,6 +118,7 @@ class transformationWeightedSenateIdeology(dml.Algorithm):
             new_json["Others ratio"] = avg_tup[2]
             new_json["Blanks ratio"] = avg_tup[3]
             new_json["Total"] = avg_tup[4]
+            new_json["Average ratio"] = (avg_tup[0] + (avg_tup[1] *-1)) / 2
             new_list += [new_json]
 
 
