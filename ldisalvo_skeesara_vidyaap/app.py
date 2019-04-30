@@ -23,9 +23,8 @@ senateList = list(repo[VOTING_DISTRICT_TOWNS_NAME].find({"Type": "Senate"}, {"Di
 districts = []
 for x in senateList:
     districts +=[x["District"]]
-#print(districts)
 
-print(districts[0])
+## below is setup code for race ##
 race = ['White', 'Black or African American', 'American Indian and Alaska Native', 'Asian', 'Native Hawaiian and Other Pacific Islander', 'Hispanic or Latino']
 initial = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({"Senate District": districts[0]}, {"White alone, percent": 1,
                                                                  "Black or African American alone, percent":1,
@@ -44,38 +43,7 @@ def getValues(district):
                                                                  "Hispanic or Latino, percent":1}))
     finVal = list(val[0].values())[1:]
     return finVal
-
-def getCorr():
-    ans = []  # format: [[dem factors, dem values], [rep factors, rep values]]
-    for x in range(2):
-        party = list(repo[DEMOGRAPHIC_SENATE_CORRELATIONS_NAME].find())[x]
-
-        temp = []
-        dictList = []
-
-        del party['_id']
-        del party['Party']
-
-        for key, value in party.items():
-            if not math.isnan(value):
-                temp = [key, value]
-                dictList.append(temp)
-
-        dictList.sort(key = lambda y: y[1], reverse=True)
-        dictList = dictList[:5]  # taking top 5 metrics
-        val = list(zip(*dictList))
-        valList = map(list, val)
-        ans += valList
-    return ans
-
-
-correlations = getCorr()
-corrDem = correlations[:2]
-corrRep = correlations[2:]
-DemLabel = corrDem[0]
-DemValue = corrDem[1]
-RepLabel = corrRep[0]
-RepValue = corrRep[1]
+## above is setup code for race ##
 app = dash.Dash()
 
 mapbox_access_token = "pk.eyJ1Ijoic2tlZXNhcmEiLCJhIjoiY2p1bXB5bGF6MHNsZTQzczh4djh1eDI3aCJ9.vTi1hnCqCO7txE_veUAaEg"
@@ -114,18 +82,10 @@ app.layout  = \
                           data=[go.Pie(labels=race,
                                        values=initialValue)],
                           layout=go.Layout(
-                              legend=dict(x=-.2, y=-.2),
-                                height = 800,
-                                width = 600,
-                                margin=dict(
-                                  l=50,
-                                  r=100,
-                                  b=20,
-                                  t=50,
-                                  pad=0
-                              ),
-                              title='Racial Breakdown')
-                      )),
+                              legend=dict(x=-.2, y=-.2, bgcolor='rgba(0,0,0,0)'),
+                              autosize=True,
+                              title='Racial Breakdown'),)
+                   ),
 
         ], className='six columns'),
 
@@ -143,16 +103,8 @@ def update_output(n_clicks, d_value, g_value):
             data=[go.Pie(labels=race,
                          values=vals)],
             layout=go.Layout(
-                legend=dict(x=-.2, y=-.2),
-                height=800,
-                width=600,
-                margin=dict(
-                    l=50,
-                    r=100,
-                    b=20,
-                    t=50,
-                    pad=0
-                ),
+                legend=dict(x=-.2, y=-.2, bgcolor='rgba(0,0,0,0)'),
+                autosize=True,
                 title='Racial Breakdown')
         )
         return figure

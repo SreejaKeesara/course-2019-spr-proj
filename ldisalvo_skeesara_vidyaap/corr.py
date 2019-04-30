@@ -1,10 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.plotly as py
 import plotly.graph_objs as go
-import plotly.graph_objs as graph_objs
-import sd_material_ui
 from dash.dependencies import Input, Output, State
 import pymongo
 from plotly import tools
@@ -25,28 +22,8 @@ senateList = list(repo[VOTING_DISTRICT_TOWNS_NAME].find({"Type": "Senate"}, {"Di
 districts = []
 for x in senateList:
     districts +=[x["District"]]
-#print(districts)
 
-print(districts[0])
-race = ['White', 'Black or African American', 'American Indian and Alaska Native', 'Asian', 'Native Hawaiian and Other Pacific Islander', 'Hispanic or Latino']
-initial = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({"Senate District": districts[0]}, {"White alone, percent": 1,
-                                                                 "Black or African American alone, percent":1,
-                                                                 "American Indian and Alaska Native alone, percent":1,
-                                                                 "Asian alone, percent":1,
-                                                                 "Native Hawaiian and Other Pacific Islander alone, percent":1,
-                                                                 "Hispanic or Latino, percent":1}))
-initialValue = list(initial[0].values())[1:]
-
-def getValues(district):
-    val = list(repo[DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME].find({"Senate District": district}, {"White alone, percent": 1,
-                                                                 "Black or African American alone, percent":1,
-                                                                 "American Indian and Alaska Native alone, percent":1,
-                                                                 "Asian alone, percent":1,
-                                                                 "Native Hawaiian and Other Pacific Islander alone, percent":1,
-                                                                 "Hispanic or Latino, percent":1}))
-    finVal = list(val[0].values())[1:]
-    return finVal
-
+### below is setup code for corr figure ###
 def getCorr():
     ans = []  # format: [[dem factors, dem values], [rep factors, rep values]]
     for x in range(2):
@@ -72,7 +49,6 @@ def getCorr():
 
 
 correlations = getCorr()
-print(correlations)
 corrDem = correlations[:2]
 corrRep = correlations[2:]
 DemLabel = [x.split(",")[0] for x in corrDem[0]]
@@ -93,10 +69,10 @@ trace1 = go.Bar(x=RepLabel,
                     )
 
 fig = tools.make_subplots(rows=1, cols=2, specs=[[{}, {}]], shared_xaxes=True,
-                          shared_yaxes=False, vertical_spacing=0.5, horizontal_spacing=.1, subplot_titles=["Democratic Party", "Republican Party"])
+                          shared_yaxes=True, vertical_spacing=0.5, horizontal_spacing=.1, subplot_titles=["Democratic Party", "Republican Party"])
 fig.append_trace(trace0, 1, 1)
 fig.append_trace(trace1, 1, 2)
-fig['layout'].update(height=800, width=600, title='Strongest Political Party Predictors in Massachusetts', showlegend=False)
+fig['layout'].update(height=550, width=600, title='Metrics Most Correlated to Political Ideology', showlegend=False)
 fig['layout']['xaxis1'].update(automargin=True, tickfont=dict(
             size=11,
             color='black'
@@ -106,13 +82,7 @@ fig['layout']['xaxis2'].update(automargin=True, tickfont=dict(
             color='black'
         ), ticks='outside', tickangle=-45)
 
-
-# yaxis = go.layout.YAxis(
-#     title='Y-axis Title',
-#     ticktext=['Very long label', 'long label', '3', 'label'],
-#     tickvals=[1, 2, 3, 4],
-#     tickmode='array',
-#     automargin=True,
+### above is setup code for corr figure ###
 
 app = dash.Dash()
 
@@ -138,7 +108,7 @@ app.layout  = \
                 id="Graph-type",
                 options=[
                     {'label': 'Racial Breakdown', 'value': 'race'},
-                    {'label': 'Strongest Political Party Predictors', 'value': 'corr'}
+                    {'label': 'Metrics Most Correlated to Political Ideology', 'value': 'corr'}
                 ],
                 multi=False,
                 value="basic-demo",
