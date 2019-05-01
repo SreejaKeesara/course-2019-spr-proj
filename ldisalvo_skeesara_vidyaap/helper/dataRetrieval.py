@@ -10,7 +10,7 @@ April 30, 2019
 import urllib
 import json
 import pandas as pd
-import dml
+import pymongo
 
 from ldisalvo_skeesara_vidyaap.helper.constants import HOUSE_DISTRICT_SHAPE_URL, \
     SENATE_DISTRICT_SHAPE_URL, TEAM_NAME, DEMOGRAPHIC_DATA_DISTRICT_SENATE_NAME, \
@@ -73,7 +73,7 @@ class dataRetrieval:
 
 
 # Set up the database connection.
-client = dml.pymongo.MongoClient()
+client = pymongo.MongoClient()
 repo = client.repo
 repo.authenticate(TEAM_NAME, TEAM_NAME)
 

@@ -19,6 +19,8 @@ from dash.dependencies import Input, Output, State
 from ldisalvo_skeesara_vidyaap.visualization.charts.senateCorr import fig as senateCorrChart
 from ldisalvo_skeesara_vidyaap.visualization.charts.houseCorr import fig as houseCorrChart
 from ldisalvo_skeesara_vidyaap.visualization.charts.race import getValues, race
+from ldisalvo_skeesara_vidyaap.visualization.charts.correlationsGraph import create_firms_graph
+from ldisalvo_skeesara_vidyaap.visualization.charts.canvassingVisual import calculate_budget
 from ldisalvo_skeesara_vidyaap.helper.dataRetrieval import dataRetrieval
 from ldisalvo_skeesara_vidyaap.helper.constants import BINS,COLORSCALE, MAPBOX_ACCESS_TOKEN,\
     URL_YEAR_TEMPLATE, URL_AVG_TEMPLATE, SENATE_KEY, HOUSE_KEY
@@ -97,7 +99,7 @@ app.layout  = \
         ], className='six columns'),
 
         html.Div([
-            html.P('Select a chart type and voting district to view more information.', style=dict(marginTop='8rem', paddingLeft='10px')),
+            html.P('Select a chart type and voting district to view more information.', style=dict( paddingLeft='10px')),
             html.Div([
                 html.Div(
                     dcc.Dropdown(
@@ -106,7 +108,8 @@ app.layout  = \
                             {'label': 'District Demographics', 'value': 'demo'},
                             {'label': 'Election Outcome Correlations', 'value': 'correlations'},
                             {'label': 'Canvassing Budget Plan', 'value': 'canvass-budget-constraint'},
-                            {'label': 'Racial Breakdown', 'value': 'race'}
+                            {'label': 'Racial Breakdown', 'value': 'race'},
+                            {'label': 'Firms Ownership Breakdown', 'value': 'firms'},
                         ],
                         multi=False,
                         value="correlations",
@@ -134,7 +137,14 @@ app.layout  = \
                     ),
                 style=dict(padding='10px', display='inline-block')),
             ]),
-            html.Div(id='chart-content'),
+            html.Div(
+                html.Div(dcc.Input(id='input-box',
+                          type='text',
+                          value="",
+                          style={'display':'none'}
+                          ), id='hidden'
+                         ),
+                id='chart-content'),
         ], className='six columns'),
     ])
 
@@ -331,6 +341,34 @@ def return_chart(btn_house_style, btn_senate_style, n_clicks, district, graphTyp
         )
 
         return dcc.Graph(id='Race', figure=race_chart)
+    elif graphType == "firms":
+        if btn_senate_style == dict(width=275, backgroundColor='lightgrey'):
+            chart = create_firms_graph(district, SENATE_KEY)
+        else:
+            chart = create_firms_graph(district, HOUSE_KEY)
+        return dcc.Graph(id='graph', figure=chart, style={'padding-left': '10px'})
+
+    elif graphType == "canvass-budget-constraint":
+        return {'display': 'none'}
+
+@app.callback(
+    [Output('hidden', 'children')],
+    [Input('Graph-type', 'value'),
+     Input('senateButton', 'buttonStyle'),
+     Input('button', 'n_clicks')],
+    [State('input-box', 'value'),
+     State('District', 'value')]
+)
+def show_input_box(g_value, btn_senate_style, n_clicks, i_value, district):
+    if g_value == "canvass-budget-constraint":
+        if btn_senate_style == dict(width=275, backgroundColor='lightgrey'):
+            chart = calculate_budget(district, i_value, SENATE_KEY)
+        else:
+            chart = calculate_budget(district, i_value, HOUSE_KEY)
+
+        return html.Div(id='container-button-basic', children=chart[0]), html.Div(
+            dcc.Input(id='input-box', type='text')), html.Button('Calculate', id='submit'), dcc.Graph(id='graph',figure=chart[1],style={'padding-left': '10px'})
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
