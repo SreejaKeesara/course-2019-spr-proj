@@ -1,3 +1,14 @@
+## Table of Contents
+[Intro](https://github.com/SreejaKeesara/course-2019-spr-proj/tree/master/ldisalvo_skeesara_vidyaap#introduction)
+[Datasets](https://github.com/SreejaKeesara/course-2019-spr-proj/tree/master/ldisalvo_skeesara_vidyaap#datasets)
+[Transformations](https://github.com/SreejaKeesara/course-2019-spr-proj/tree/master/ldisalvo_skeesara_vidyaap#transformations)
+[Analysis Techniques](https://github.com/SreejaKeesara/course-2019-spr-proj/tree/master/ldisalvo_skeesara_vidyaap#analysis-techniques)
+[Conclusion](https://github.com/SreejaKeesara/course-2019-spr-proj/tree/master/ldisalvo_skeesara_vidyaap#conclusion)
+[Visualization](https://github.com/SreejaKeesara/course-2019-spr-proj/tree/master/ldisalvo_skeesara_vidyaap#visualization)
+[Future Work](https://github.com/SreejaKeesara/course-2019-spr-proj/tree/master/ldisalvo_skeesara_vidyaap#future-work)
+[Additional Python Libraries](https://github.com/SreejaKeesara/course-2019-spr-proj/tree/master/ldisalvo_skeesara_vidyaap#additional-python-libraries)
+
+
 # Political Ideology Mapping of Massachusetts
 Team Members: Vidya Akavoor, Lauren DiSalvo, Sreeja Keesara
 
