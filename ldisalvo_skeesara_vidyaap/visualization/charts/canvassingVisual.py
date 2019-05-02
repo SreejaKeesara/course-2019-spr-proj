@@ -120,6 +120,8 @@ def calculate_budget(dist, i_value, district_type):
     fig.layout.polar.bargap = 0.9
     fig.layout.polar.sector = [0, 180]
     fig.layout.polar.domain.x = [0, 1]
+    fig.layout.plot_bgcolor = 'rgba(0,0,0,0)'
+    fig.layout.paper_bgcolor = 'rgba(0,0,0,0)'
 
     needle = fig.add_scatterpolar(r=[1, 0, 0, 1],
                                   theta=[0, -20, 20, 0],

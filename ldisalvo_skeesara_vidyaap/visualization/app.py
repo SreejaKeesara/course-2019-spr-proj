@@ -98,13 +98,12 @@ app.layout  = \
         ], className='six columns'),
 
         html.Div([
-            html.P('Select a chart type and voting district to view more information.', style=dict( paddingLeft='10px')),
+            html.P('Select a chart type and voting district to view more information.', style=dict(marginTop='8rem', paddingLeft='10px')),
             html.Div([
                 html.Div(
                     dcc.Dropdown(
                         id='Graph-type',
                         options=[
-                            {'label': 'District Demographics', 'value': 'demo'},
                             {'label': 'Election Outcome Correlations', 'value': 'correlations'},
                             {'label': 'Canvassing Budget Plan', 'value': 'canvass-budget-constraint'},
                             {'label': 'Racial Breakdown', 'value': 'race'},
@@ -195,11 +194,10 @@ def disable_district(g_value):
     [Input('houseButton', 'buttonStyle'),
      Input('senateButton', 'buttonStyle'),
      Input('historical', 'toggled'),
-     Input('year-slider', 'value'),
-     Input('button', 'n_clicks')],
+     Input('year-slider', 'value')],
     [State('district-level-choropleth', 'figure'),
      State('District', 'value')])
-def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, n_clicks, figure, district):
+def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure, district):
     annotations = [dict(
         showarrow=False,
         align='right',
@@ -268,7 +266,7 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, n_clicks
         for x in range(len(districtList)):
             hoverList.append('{district}<br>Population: {pop}<br>Score: {score}'.format(
                 district=districtList[x], pop=SENATE_MAP_POINTS['population'][x],
-                score=ratiosList[x][0]))
+                score=ratiosList[x].tolist()[0]))
 
         data = [dict(
             lat=SENATE_MAP_POINTS['lat'],
@@ -358,14 +356,17 @@ def return_chart(btn_house_style, btn_senate_style, n_clicks, district, graphTyp
 
     elif graphType == "canvass-budget-constraint":
         return [
-                    html.Div(id='constraint-message', children='Enter a budget and press "Calculate" to see which towns in {} you can visit'.format(district)),
-                    html.Div(dcc.Input(id='constraint-input', type='text')),
-                    html.Button('Calculate', id='constraint-submit'),
+                        html.Div(id='constraint-message',
+                                 children='Enter a budget and press "Calculate" to see which towns in {} you can visit'.format(
+                                     district),
+                                 style=dict(padding='10px')),
+                        html.Div(dcc.Input(id='constraint-input', type='text'), style=dict(padding='10px', display='inline-block')),
+                        html.Div(html.Button('Calculate', id='constraint-submit'), style=dict(padding='10px', display='inline-block')),
 
-                    dcc.Graph(
-                        id='constraint-chart',
-                        style={'padding-left': '10px'}
-                    ),
+                        dcc.Graph(
+                            id='constraint-chart',
+                            style={'padding-left': '10px'}
+                        ),
                 ]
 
 @app.callback(

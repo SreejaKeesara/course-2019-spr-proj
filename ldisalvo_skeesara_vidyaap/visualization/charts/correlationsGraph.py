@@ -82,6 +82,8 @@ def create_firms_graph(district, district_type):
     data = [trace0]
     layout = go.Layout(
         title='Firms Ownership Breakdown in '+district,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
     )
 
     graph = go.Figure(data=data, layout=layout)
