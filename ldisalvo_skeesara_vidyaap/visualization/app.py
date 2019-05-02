@@ -139,6 +139,7 @@ app.layout  = \
             html.Div(
                 id='chart-content',
                 children=[
+                    html.Div(id='constraint-message'),
                     html.Div(dcc.Input(id='constraint-input', type='text')),
                     html.Button('Calculate', id='constraint-submit'),
 
@@ -357,6 +358,7 @@ def return_chart(btn_house_style, btn_senate_style, n_clicks, district, graphTyp
 
     elif graphType == "canvass-budget-constraint":
         return [
+                    html.Div(id='constraint-message', children='Enter a budget and press "Calculate" to see which towns in {} you can visit'.format(district)),
                     html.Div(dcc.Input(id='constraint-input', type='text')),
                     html.Button('Calculate', id='constraint-submit'),
 
@@ -367,7 +369,8 @@ def return_chart(btn_house_style, btn_senate_style, n_clicks, district, graphTyp
                 ]
 
 @app.callback(
-    Output('constraint-chart', 'figure'),
+    [Output('constraint-message', 'children'),
+    Output('constraint-chart', 'figure')],
     [Input('constraint-submit', 'n_clicks')],
     [State('District', 'value'),
      State('constraint-input', 'value'),
@@ -382,27 +385,16 @@ def create_constraint_chart(n_clicks, district, budget_constraint, btn_house_sty
         else:
             msg, constraint_chart = calculate_budget(district, budget_constraint, HOUSE_KEY)
 
-        return constraint_chart
-    return []
-
-# @app.callback(
-#     [Output('hidden', 'children')],
-#     [Input('Graph-type', 'value'),
-#      Input('senateButton', 'buttonStyle'),
-#      Input('button', 'n_clicks')],
-#     [State('input-box', 'value'),
-#      State('District', 'value')]
-# )
-# def show_input_box(g_value, btn_senate_style, n_clicks, i_value, district):
-#     if g_value == "canvass-budget-constraint":
-#         if btn_senate_style == dict(width=275, backgroundColor='lightgrey'):
-#             chart = calculate_budget(district, i_value, SENATE_KEY)
-#         else:
-#             chart = calculate_budget(district, i_value, HOUSE_KEY)
-#
-#         return html.Div(id='container-button-basic', children=chart[0]), html.Div(
-#             dcc.Input(id='input-box', type='text')), html.Button('Calculate', id='submit'), dcc.Graph(id='graph',figure=chart[1],style={'padding-left': '10px'})
-
+        return msg, constraint_chart
+    return "", [
+                html.Div(id='constraint-message', children='Enter a budget and press "Calculate" to see which towns in {} you can visit'.format(district)),
+                html.Div(dcc.Input(id='constraint-input', type='text')),
+                html.Button('Calculate', id='constraint-submit'),
+                dcc.Graph(
+                    id='constraint-chart',
+                    style={'padding-left': '10px'}
+                ),
+    ]
 
 if __name__ == '__main__':
     app.run_server(debug=True)
