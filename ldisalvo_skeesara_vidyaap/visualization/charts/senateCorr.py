@@ -66,7 +66,7 @@ fig = tools.make_subplots(rows=1, cols=2, specs=[[{}, {}]], shared_xaxes=True,
                           shared_yaxes=True, vertical_spacing=0.5, horizontal_spacing=.1, subplot_titles=["Democratic Party", "Republican Party"])
 fig.append_trace(trace0, 1, 1)
 fig.append_trace(trace1, 1, 2)
-fig['layout'].update(height=550, width=600, title='Metrics Most Correlated to Political Ideology', showlegend=False)
+fig['layout'].update(height=550, width=600, title='Metrics Most Correlated to Political Ideology', showlegend=False,plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
 fig['layout']['xaxis1'].update(automargin=True, tickfont=dict(
             size=11,
             color='black'

@@ -7,7 +7,6 @@ Notes :
 
 April 28, 2019
 """
-
 import sd_material_ui
 import plotly.graph_objs as go
 
@@ -68,7 +67,7 @@ app.layout  = \
 
             html.Div([
                 html.P(id = 'choropleth-title',
-                       style = {'fontWeight':600}),
+                       style = {'fontWeight':600, 'padding-right': '10px'}),
                 dcc.Loading(id='loading-1', children=[dcc.Graph(
                     id='district-level-choropleth',
                     animate=True,
@@ -138,13 +137,17 @@ app.layout  = \
                 style=dict(padding='10px', display='inline-block')),
             ]),
             html.Div(
-                html.Div(dcc.Input(id='input-box',
-                          type='text',
-                          value="",
-                          style={'display':'none'}
-                          ), id='hidden'
-                         ),
-                id='chart-content'),
+                id='chart-content',
+                children=[
+                    html.Div(dcc.Input(id='constraint-input', type='text')),
+                    html.Button('Calculate', id='constraint-submit'),
+
+                    dcc.Graph(
+                        id='constraint-chart',
+                        style={'padding-left': '10px'}
+                    ),
+                ]
+            ),
         ], className='six columns'),
     ])
 
@@ -174,9 +177,9 @@ def update_buttons(n_clicks_house, n_clicks_senate, n_clicks_prev_house, n_click
     [Input('historical', 'toggled')])
 def update_slider(wantsAverage):
     if wantsAverage:
-        return True, "Average Political Party Alignment by Voting District from Republican (-1) to Democrat (1)"
+        return True, "Average Political Party Alignment by Voting District from Republican to Democrat (-1, 1)"
     else:
-        return False, "Political Party Alignment by Voting District and Year from Republican (-1) to Democrat (1)"
+        return False, "Political Party Alignment by Voting District and Year from Republican to Democrat (-1, 1)"
 
 @app.callback(
     Output('District', 'disabled'),
@@ -191,9 +194,11 @@ def disable_district(g_value):
     [Input('houseButton', 'buttonStyle'),
      Input('senateButton', 'buttonStyle'),
      Input('historical', 'toggled'),
-     Input('year-slider', 'value')],
-    [State('district-level-choropleth', 'figure')])
-def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
+     Input('year-slider', 'value'),
+     Input('button', 'n_clicks')],
+    [State('district-level-choropleth', 'figure'),
+     State('District', 'value')])
+def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, n_clicks, figure, district):
     annotations = [dict(
         showarrow=False,
         align='right',
@@ -262,7 +267,7 @@ def update_graph(btn_house_style, btn_senate_style, wantsAverage, year, figure):
         for x in range(len(districtList)):
             hoverList.append('{district}<br>Population: {pop}<br>Score: {score}'.format(
                 district=districtList[x], pop=SENATE_MAP_POINTS['population'][x],
-                score=ratiosList[x]))
+                score=ratiosList[x][0]))
 
         data = [dict(
             lat=SENATE_MAP_POINTS['lat'],
@@ -336,6 +341,8 @@ def return_chart(btn_house_style, btn_senate_style, n_clicks, district, graphTyp
                          values=vals)],
             layout=go.Layout(
                 legend=dict(x=-.2, y=-.2, bgcolor='rgba(0,0,0,0)'),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
                 autosize=True,
                 title='Racial Breakdown')
         )
@@ -349,25 +356,52 @@ def return_chart(btn_house_style, btn_senate_style, n_clicks, district, graphTyp
         return dcc.Graph(id='graph', figure=chart, style={'padding-left': '10px'})
 
     elif graphType == "canvass-budget-constraint":
-        return {'display': 'none'}
+        return [
+                    html.Div(dcc.Input(id='constraint-input', type='text')),
+                    html.Button('Calculate', id='constraint-submit'),
+
+                    dcc.Graph(
+                        id='constraint-chart',
+                        style={'padding-left': '10px'}
+                    ),
+                ]
 
 @app.callback(
-    [Output('hidden', 'children')],
-    [Input('Graph-type', 'value'),
-     Input('senateButton', 'buttonStyle'),
-     Input('button', 'n_clicks')],
-    [State('input-box', 'value'),
-     State('District', 'value')]
+    Output('constraint-chart', 'figure'),
+    [Input('constraint-submit', 'n_clicks')],
+    [State('District', 'value'),
+     State('constraint-input', 'value'),
+     State('houseButton', 'buttonStyle'),
+     State('senateButton', 'buttonStyle')]
 )
-def show_input_box(g_value, btn_senate_style, n_clicks, i_value, district):
-    if g_value == "canvass-budget-constraint":
+def create_constraint_chart(n_clicks, district, budget_constraint, btn_house_style, btn_senate_style):
+    if n_clicks != None:
+        budget_constraint = int(budget_constraint.replace(',',''))
         if btn_senate_style == dict(width=275, backgroundColor='lightgrey'):
-            chart = calculate_budget(district, i_value, SENATE_KEY)
+            msg, constraint_chart = calculate_budget(district, budget_constraint, SENATE_KEY)
         else:
-            chart = calculate_budget(district, i_value, HOUSE_KEY)
+            msg, constraint_chart = calculate_budget(district, budget_constraint, HOUSE_KEY)
 
-        return html.Div(id='container-button-basic', children=chart[0]), html.Div(
-            dcc.Input(id='input-box', type='text')), html.Button('Calculate', id='submit'), dcc.Graph(id='graph',figure=chart[1],style={'padding-left': '10px'})
+        return constraint_chart
+    return []
+
+# @app.callback(
+#     [Output('hidden', 'children')],
+#     [Input('Graph-type', 'value'),
+#      Input('senateButton', 'buttonStyle'),
+#      Input('button', 'n_clicks')],
+#     [State('input-box', 'value'),
+#      State('District', 'value')]
+# )
+# def show_input_box(g_value, btn_senate_style, n_clicks, i_value, district):
+#     if g_value == "canvass-budget-constraint":
+#         if btn_senate_style == dict(width=275, backgroundColor='lightgrey'):
+#             chart = calculate_budget(district, i_value, SENATE_KEY)
+#         else:
+#             chart = calculate_budget(district, i_value, HOUSE_KEY)
+#
+#         return html.Div(id='container-button-basic', children=chart[0]), html.Div(
+#             dcc.Input(id='input-box', type='text')), html.Button('Calculate', id='submit'), dcc.Graph(id='graph',figure=chart[1],style={'padding-left': '10px'})
 
 
 if __name__ == '__main__':
