@@ -446,7 +446,11 @@ Furthermore, the following five metrics were the most strongly correlated with v
 ## Visualization
 Outlined below is a user experience flow for our application.
 
-On opening the application, the user can select between two tabs, “House” and “Senate,” that will change the second dropdown and map portions of our app.  By default, the app will open on the “Senate” tab that will populate one dropdown menu with all the graph types that the user can view and a second dropdown menu with the MA Senate voting districts.  On the left side of the app, the user will see a map that has the Senate voting districts shaded by ideology and on the right, the user will see a racial breakdown of the default district, “Berkshire, Hampshire and Franklin.”  The user can select from the two drop down menus which district they would like to learn about and which visual they want to see.  The available visual types are “Racial Breakdown,” “Metrics Most Correlated to Political Ideology,” “Firms Ownership Breakdown,” and “Canvassing Budget Plan.”  On the “Canvassing Budget Plan” visual, the user can input a proposed budget for the number of people they want to canvass in a district, and see which towns they would be able to visit under that constraint.  On the left side, under the map, is a slider that can be used to view the map at different points in time from 2010 to 2018.
+On opening the application, the user can select between two tabs, “House” and “Senate,” that will change the second dropdown and map portions of our app.  By default, the app will open on the “House” tab that will populate one dropdown menu with all the graph types that the user can view and a second dropdown menu with the MA Senate voting districts.  On the left side of the app, the user will see a map that has the Senate voting districts shaded by ideology and on the right, the user will see a racial breakdown of the default district, “Berkshire, Hampshire and Franklin.”  The user can select from the two drop down menus which district they would like to learn about and which visual they want to see.  The available visual types are “Racial Breakdown,” “Metrics Most Correlated to Political Ideology,” “Firms Ownership Breakdown,” and “Canvassing Budget Plan.”  On the “Canvassing Budget Plan” visual, the user can input a proposed budget for the number of people they want to canvass in a district, and see which towns they would be able to visit under that constraint.  On the left side, under the map, is a slider that can be used to view the map at different points in time from 2010 to 2018.
+
+See the below video and pictures for more details.
+
+
 
 To run visualization, first make sure that all python libraries in requirements.txt are installed. Make sure that your mongo database is running:
 ```
@@ -458,11 +462,7 @@ Then run all the scripts in our team folder:
 python3.7 execute.py ldisalvo_skeesara_vidyaap
 ```
 
-Then run app.py from within our directory.
-```
-python3.7 app.py
-```
-The application should be available at your default local host address.
+Then run app.py. The easiest way to do this is on PyCharm by right-clicking on the file name and selecting 'run'. The application should be available at your default local host address.
 
 ## Future Work
 A possible next step is to expand our visualization to include all fifty states. Users would have the option of viewing an individual state's election or national election results. We could also add more graph visualizations per district and state and provide users with the ability to compare multiple districts or states at the same time.
