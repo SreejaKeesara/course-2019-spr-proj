@@ -117,6 +117,7 @@ class transformationWeightedHouseIdeology(dml.Algorithm):
             new_json["Others ratio"] = avg_tup[2]
             new_json["Blanks ratio"] = avg_tup[3]
             new_json["Total"] = avg_tup[4]
+            new_json["Average ratio"] = (avg_tup[0] + (avg_tup[1] * -1)) / 2
             new_list += [new_json]
 
 

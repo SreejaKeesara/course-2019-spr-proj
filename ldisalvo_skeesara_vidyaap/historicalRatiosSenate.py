@@ -109,6 +109,10 @@ class historicalRatiosSenate(dml.Algorithm):
         repo.dropCollection(HISTORICAL_RATIOS_SENATE)
         repo.createCollection(HISTORICAL_RATIOS_SENATE_NAME)
         repo[HISTORICAL_RATIOS_SENATE_NAME].insert_many(new_list)
+
+        repo[HISTORICAL_RATIOS_SENATE_NAME].update({"year": 2018}, {"$set": {
+            "2nd Hampden and Hampshire": -0.9793112394}})
+
         repo[HISTORICAL_RATIOS_SENATE_NAME].metadata({'complete': True})
         print(repo[HISTORICAL_RATIOS_SENATE_NAME].metadata())
 

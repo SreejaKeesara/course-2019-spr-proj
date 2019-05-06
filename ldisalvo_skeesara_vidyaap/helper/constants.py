@@ -45,6 +45,9 @@ DEMOGRAPHIC_DATA_COUNTY_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=DE
 COUNTY_SHAPE = "countyShape"
 COUNTY_SHAPE_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=COUNTY_SHAPE)
 
+VOTING_DISTRICT_SHAPE = "votingDistrictShape"
+VOTING_DISTRICT_SHAPE_NAME = "{tn}.{dn}".format(tn=TEAM_NAME, dn=VOTING_DISTRICT_SHAPE)
+
 WEIGHTED_SENATE_IDEOLOGIES = "weightedSenateIdeologies"
 WEIGHTED_SENATE_IDEOLOGIES_NAME = "ldisalvo_skeesara_vidyaap.{name}".format(name=WEIGHTED_SENATE_IDEOLOGIES)
 
@@ -183,3 +186,16 @@ TOWN_URL = "https://www.census.gov/quickfacts/fact/csv//PST045218"
 
 #county shape data
 FUSION_TABLE_URL = "http://datamechanics.io/data/ldisalvo_skeesara_vidyaap/massachusetts_counties.csv"
+
+#voting district shape data
+HOUSE_DISTRICT_SHAPE_URL = "http://datamechanics.io/data/ldisalvo_skeesara_vidyaap/MA_House_Shapes.json"
+SENATE_DISTRICT_SHAPE_URL = "http://datamechanics.io/data/ldisalvo_skeesara_vidyaap/MA_Senate_Shapes.json"
+
+# app.py data
+BINS = [-1, -.8, -.6, -.4, -.2, 0, .2, .4, .6, .8, 1]
+COLORSCALE = ["#e50b00", "#cb0a15", "#b2092a", "#98083f", "#7f0754", "#65066a", "#4c057f", "#320494", "#1903a9", "#0003bf"]
+MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoic2tlZXNhcmEiLCJhIjoiY2p1bXB5bGF6MHNsZTQzczh4djh1eDI3aCJ9.vTi1hnCqCO7txE_veUAaEg"
+URL_YEAR_TEMPLATE = "http://datamechanics.io/data/ldisalvo_skeesara_vidyaap/{type}-{year}-{upper}-{lower}-shape-date.json"
+URL_AVG_TEMPLATE = "http://datamechanics.io/data/ldisalvo_skeesara_vidyaap/{type}-average-{upper}-{lower}-shape-data.json"
+SENATE_KEY = "Senate"
+HOUSE_KEY = "House"

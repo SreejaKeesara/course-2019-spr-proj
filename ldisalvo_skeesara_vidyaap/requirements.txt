@@ -1,7 +1,9 @@
 bs4
-csv
-io
 pandas
 requests
 scipy
 z3-solver
+dash==0.39.0
+dash-daq==0.1.0
+sd-material-ui
+dash_colorscales
